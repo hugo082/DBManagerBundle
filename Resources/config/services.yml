@@ -1,0 +1,9 @@
+services:
+    db.manager.checker:
+        class: DB\ManagerBundle\Checker\EntityManager
+        arguments: [ "@doctrine.orm.entity_manager", "@security.authorization_checker", "@security.token_storage" ]
+    db.manager.exception.listener:
+        class: DB\ManagerBundle\EventListener\ExceptionListener
+        arguments: [ "@twig" ]
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }

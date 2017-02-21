@@ -1,0 +1,7 @@
+<h3>Add :</h3>
+{{ form_start(form) }}
+        {% for row in form %}
+            {{ form_row(row) }}
+        {% endfor %}
+<button type="submit" name="button">Submit</button>
+{{ form_end(form) }}

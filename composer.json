@@ -1,0 +1,26 @@
+{
+  "name" : "db/managerbundle",
+  "description" : "Manage your databasee with web interface",
+  "type" : "symfony-bundle",
+  "license": "MIT",
+  "authors" : [{
+    "name" : "Hugo Fouquet",
+    "email" : "hugo.fouquet@epita.fr",
+    "role": "Developer"
+  }],
+  "keywords" : [
+    "Database manager", "Web interface manager"
+  ],
+  "require" : {
+    "php" : ">=5.6.0",
+    "symfony/framework-bundle" : ">=3.0",
+    "twig/twig" : "*",
+    "doctrine/doctrine-bundle" : "*"
+  },
+  "autoload" : {
+    "psr-0" : {
+      "DB\\ManagerBundle" : ""
+    }
+  },
+  "target-dir" : "DB/ManagerBundle"
+}

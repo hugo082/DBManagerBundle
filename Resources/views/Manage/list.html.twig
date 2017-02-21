@@ -1,0 +1,18 @@
+<h3>Listing :</h3>
+<table>
+    {% for e in all %}
+        <tr>
+            <td>{{ e.id }}</td>
+            <td>{{ e.name }}</td>
+            <td>{{ e.code }}</td>
+            <td>{{ e.country }}</td>
+            <td>{{ e.rank }}</td>
+            {% if einfo.permission.edit %}
+                <td><a href="{{ path('db.manager.edit', {'name':name,'id':e.id})}}">Edit</a></td>
+            {% endif %}
+            {% if einfo.permission.remove %}
+                <td><a href="{{ path('db.manager.remove', {'name':name,'id':e.id})}}">Remove</a></td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+</table>

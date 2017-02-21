@@ -1,0 +1,29 @@
+{% extends '::base.html.twig' %}
+
+{% block body %}
+
+    {% if app.request.hasPreviousSession %}
+        {% for type, messages in app.session.flashbag.all() %}
+            {% for message in messages %}
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="alert alert-{{ type }}">
+                        <strong>{{ type }}</strong> {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    <h1>Manage {{ name }}</h1>
+
+    {% if all is not empty %}
+        {% include 'DBManagerBundle:Manage:list.html.twig' %}
+    {% endif %}
+
+    {% if form is not empty %}
+        {% include 'DBManagerBundle:Manage:form.html.twig' %}
+    {% elseif action == 'list' and einfo.permission.add %}
+        <a href="{{ path('db.manager.add', {'name':name}) }}">Add</a>
+    {% endif %}
+
+{% endblock %}
