@@ -48,6 +48,10 @@ class DBManagerExtension extends Extension
     private function loadEntities(array $config, ContainerBuilder $container, array $permissions)
     {
         foreach ($config['entities'] as $name => $values) {
+            $arr = explode(":", $values['fullName'], 2);
+            $values['bundle'] = $arr[0];
+            $values['name'] = $arr[1];
+
             if (!isset($values['fullPath']))
                 $values['fullPath'] = $values['bundle']."\\Entity\\".$values['name'];
 

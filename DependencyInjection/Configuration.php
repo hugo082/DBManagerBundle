@@ -68,8 +68,14 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('entities')
                     ->prototype('array')
                         ->children()
-                            ->scalarNode('name')->isRequired()->cannotBeEmpty()->end()
-                            ->scalarNode('bundle')->isRequired()->cannotBeEmpty()->end()
+                            ->scalarNode('fullName')->isRequired()->cannotBeEmpty()
+                                ->validate()
+                                ->ifTrue(function ($s) {
+                                    return preg_match('#^[a-zA-Z]+Bundle:[a-zA-Z]+$#', $s) !== 1;
+                                })
+                                ->thenInvalid('Invalid fullName. (Ex: AppBundle:RealName)')
+                                ->end()
+                            ->end()
                             ->scalarNode('fullPath')->end()     // Auto
                             ->scalarNode('formType')->end()     // Auto
                             ->scalarNode('fullFormType')->end() // Auto

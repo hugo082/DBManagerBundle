@@ -62,8 +62,7 @@ Set up your `config.yml` :
     db_manager:
         entities:
             DisplayName:
-                name: RealName
-                bundle: YourBundle
+                fullName: YourBundle:RealName
 
 ## About
 
@@ -83,15 +82,13 @@ DBM load your entities with your configuration file. You can specify an entity t
     db_manager:
         entities:
             DisplayName:
-                name: RealName
-                bundle: YourBundle
+                fullName: YourBundle:RealName
 
 You can configure different actions on each entity :
 
      DisplayName:
-        name: RealName
-        bundle: YourBundle
-        fullPath: AppBundle\Entity\Airport                  # Optional
+        fullName: YourBundle:RealName
+        fullPath: YourBundle\Entity\Airport                 # Optional
         formType: AirportEditType                           # Optional
         fullFormType: AnotherBundle\Form\AirportEditType    # Optional
         permission: [ "edit" ]                              # Optional - add | edit | remove
