@@ -72,7 +72,7 @@ Update your `config.yml` :
 
 ## About
 
-UserBundle is a FOUQUET initiative.
+DBManagerBundle is a FOUQUET initiative.
 See also the [creator](https://github.com/hugo082).
 
 ## License
