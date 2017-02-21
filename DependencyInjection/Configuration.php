@@ -2,6 +2,7 @@
 
 namespace DB\ManagerBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -12,6 +13,8 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 class Configuration implements ConfigurationInterface
 {
+    public $permissions = array('add', 'edit', 'remove');
+
     /**
      * {@inheritdoc}
      */
@@ -20,62 +23,66 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('db_manager');
 
-//        $rootNode
-//            ->children()
-//                ->arrayNode('twitter')
-//                    ->children()
-//                        ->integerNode('client_id')->end()
-//                        ->scalarNode('client_secret')->end()
-//                    ->end()
-//                ->end() // twitter
-//            ->end()
-//        ;
+        $this->addEntitiesSection($rootNode);
+        $this->addViewsSection($rootNode);
 
-        //$supportedValues = array('invalid','nulle');
+        return $treeBuilder;
+    }
 
-        $rootNode
+    /**
+     * @param ArrayNodeDefinition $node
+     */
+    private function addViewsSection(ArrayNodeDefinition $node)
+    {
+        $node
+            ->children()
+                ->arrayNode('views')
+                    ->addDefaultsIfNotSet()
+                    ->canBeUnset()
+                    ->children()
+                        ->arrayNode('list')
+                        ->addDefaultsIfNotSet()
+                            ->children()
+                                ->booleanNode('add')->defaultTrue()->end()
+                            ->end()
+                        ->end()
+                        ->arrayNode('edit')
+                        ->addDefaultsIfNotSet()
+                            ->children()
+                                ->booleanNode('list')->defaultTrue()->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
+    }
+
+    /**
+     * @param ArrayNodeDefinition $node
+     */
+    private function addEntitiesSection(ArrayNodeDefinition $node)
+    {
+        $node
             ->children()
                 ->arrayNode('entities')
                     ->prototype('array')
                         ->children()
                             ->scalarNode('name')->isRequired()->cannotBeEmpty()->end()
                             ->scalarNode('bundle')->isRequired()->cannotBeEmpty()->end()
-                            ->scalarNode('fullpath')->isRequired()->cannotBeEmpty()->end()
-                            ->scalarNode('formtype')->isRequired()->cannotBeEmpty()->end()
+                            ->scalarNode('fullPath')->end()     // Auto
+                            ->scalarNode('formType')->end()     // Auto
+                            ->scalarNode('fullFormType')->end() // Auto
                             ->arrayNode('permission')
-                                ->children()
-                                    ->booleanNode('add')->isRequired()->defaultTrue()->end()
-                                    ->booleanNode('edit')->isRequired()->defaultTrue()->end()
-                                    ->booleanNode('remove')->isRequired()->defaultTrue()->end()
+                                ->defaultValue($this->permissions)
+                                ->prototype('enum')
+                                    ->values($this->permissions)
                                 ->end()
                             ->end()
                         ->end()
                     ->end()
                 ->end()
-                ->arrayNode('views')
-                    ->children()
-                        ->arrayNode('list')
-                            ->children()
-                                ->booleanNode('add')->isRequired()->defaultTrue()->end()
-                            ->end()
-                        ->end()
-                        ->arrayNode('edit')
-                            ->children()
-                                ->booleanNode('list')->isRequired()->defaultTrue()->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-//                ->scalarNode('client_id')
-//                    ->validate()
-//                        ->ifNotInArray($supportedValues)
-//                        ->thenInvalid('c\'est mal')
-//                    ->end()
-//                ->end()
             ->end()
         ;
-
-
-        return $treeBuilder;
     }
 }

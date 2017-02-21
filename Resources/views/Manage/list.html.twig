@@ -1,12 +1,16 @@
 <h3>Listing :</h3>
 <table>
+    <tr>
+        {% for name in all.0.properties %}
+            <th>{{ name }}</th>
+        {% endfor %}
+    </tr>
     {% for e in all %}
         <tr>
-            <td>{{ e.id }}</td>
-            <td>{{ e.name }}</td>
-            <td>{{ e.code }}</td>
-            <td>{{ e.country }}</td>
-            <td>{{ e.rank }}</td>
+            {% for item in e.vars %}
+                <td>{{ item }}</td>
+            {% endfor %}
+
             {% if einfo.permission.edit %}
                 <td><a href="{{ path('db.manager.edit', {'name':name,'id':e.id})}}">Edit</a></td>
             {% endif %}

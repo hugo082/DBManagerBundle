@@ -1,7 +1,7 @@
 
 # Database Manager Web Interface
 
-DBManager is a web interface generator that help you to implement a database 
+DBManager (DBM) is a web interface generator that help you to implement a database 
 manager on your website.
 
 Features include:
@@ -11,7 +11,7 @@ Features include:
     * Remove
 * Personalize interface
 
-`v1.0` `21 FEV 17`
+`v1.1` `21 FEV 17`
 
 ## Installation
 
@@ -47,28 +47,23 @@ Enable the bundle in the kernel :
     {
         $bundles = array(
             // ...
-            new FOS\UserBundle\FOSUserBundle()
+            new DB\ManagerBundle\DBManagerBundle()
         );
     }
 
-Update your `config.yml` :
+Update your `routing.yml` :
+
+    db.manager:
+        resource: "@DBManagerBundle/Resources/config/routing.yml"
+        prefix:   /database
+
+Set up your `config.yml` :
 
     db_manager:
-        views:
-            list:
-                add: false
-            edit:
-                list: false
         entities:
-            DisplayName: # Display and URL name
+            DisplayName:
                 name: RealName
-                bundle: AppBundle
-                fullpath: AppBundle\Entity\RealName
-                formtype: AppBundle\Form\RealNameType
-                permission:
-                    add: true
-                    edit: true
-                    remove: false
+                bundle: YourBundle
 
 ## About
 
@@ -78,3 +73,48 @@ See also the [creator](https://github.com/hugo082).
 ## License
 
 This bundle is under the MIT license. See the complete license [in the bundle](LICENSE)
+
+## Documentation
+
+1. Add an entity
+
+DBM load your entities with your configuration file. You can specify an entity to follow by adding it in your config.yml
+
+    db_manager:
+        entities:
+            DisplayName:
+                name: RealName
+                bundle: YourBundle
+
+You can configure different actions on each entity :
+
+     DisplayName:
+        name: RealName
+        bundle: YourBundle
+        fullPath: AppBundle\Entity\Airport                  # Optional
+        formType: AirportEditType                           # Optional
+        fullFormType: AnotherBundle\Form\AirportEditType    # Optional
+        permission: [ "edit" ]                              # Optional - add | edit | remove
+
+By default, DBM load your entity in `YourBundle\Entity\RealName`, name the form with `RealNameType` and load your form type in 
+`YourBundle\Form\formType` (so `YourBundle\Form\RealNameType`)
+`DisplayName` is used by DBM for display on template and in url, you can enter the same name of RealName.
+
+2. Configure views
+
+You can configure your views by adding the `views` keyword in your configuration file.
+
+    db_manager:
+        views: ~
+
+By default, DBM insert the add form in listing view and list in edit view. But if you want to separate all views, you can 
+set the options to `false`.
+
+    db_manager:
+        views:
+            list:
+                add: false
+            edit:
+                list: false
+
+If you do not specify an argument, the argument takes its default value (`true`)

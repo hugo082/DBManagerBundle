@@ -22,12 +22,12 @@ class ManageController extends Controller
         $settings = $this->container->getParameter('db_manager.views');
         $einfo = $this->get('db.manager.checker')->getEntity($array, $name);
 
-        $e = new $einfo['fullpath']();
+        $e = new $einfo['fullPath']();
         $all = $this->getEntity($einfo);
 
         $form = NULL;
         if ($settings['list']['add'] && $einfo['permission']['add']) {
-            $form = $this->createForm($einfo['formtype'], $e);
+            $form = $this->createForm($einfo['fullFormType'], $e);
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
                 $em = $this->getDoctrine()->getManager();
@@ -57,8 +57,8 @@ class ManageController extends Controller
         if ($settings['list']['add'] || !$einfo['permission']['add'])
             return $this->redirectToRoute('db.manager.list', array('name' => $name));
 
-        $e = new $einfo['fullpath']();
-        $form = $this->createForm($einfo['formtype'], $e);
+        $e = new $einfo['fullPath']();
+        $form = $this->createForm($einfo['fullFormType'], $e);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
@@ -90,7 +90,7 @@ class ManageController extends Controller
             $this->addFlash('danger','Entity not found');
             return $this->redirectToRoute('db.manager.list', array('name' => $name));
         }
-        $form = $this->createForm($einfo['formtype'], $e);
+        $form = $this->createForm($einfo['fullFormType'], $e);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
