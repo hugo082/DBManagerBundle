@@ -40,6 +40,7 @@ class Configuration implements ConfigurationInterface
                     ->addDefaultsIfNotSet()
                     ->canBeUnset()
                     ->children()
+                        ->scalarNode('indexView')->defaultValue('DBManagerBundle:Manage:index.html.twig')->end() // Auto
                         ->arrayNode('list')
                         ->addDefaultsIfNotSet()
                             ->children()
@@ -66,7 +67,7 @@ class Configuration implements ConfigurationInterface
         $node
             ->children()
                 ->arrayNode('entities')
-                    ->prototype('array')
+                    ->prototype('array')->addDefaultsIfNotSet()
                         ->children()
                             ->scalarNode('fullName')->isRequired()->cannotBeEmpty()
                                 ->validate()
@@ -79,6 +80,9 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('fullPath')->end()     // Auto
                             ->scalarNode('formType')->end()     // Auto
                             ->scalarNode('fullFormType')->end() // Auto
+                            ->scalarNode('listView')->defaultValue('DBManagerBundle:Manage:list.html.twig')->end() // Auto
+                            ->scalarNode('formView')->defaultValue('DBManagerBundle:Manage:form.html.twig')->end() // Auto
+                            ->scalarNode('mainView')->defaultValue('DBManagerBundle:Manage:entity.html.twig')->end() // Auto
                             ->arrayNode('permission')
                                 ->defaultValue($this->permissions)
                                 ->prototype('enum')

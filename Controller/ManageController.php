@@ -11,7 +11,8 @@ class ManageController extends Controller
     public function indexAction()
     {
         $entities = $this->container->getParameter( 'db_manager.entities' );
-        return $this->render('DBManagerBundle:Manage:index.html.twig', array(
+        $settings = $this->container->getParameter('db_manager.views');
+        return $this->render($settings['indexView'], array(
             'entities' => $entities
         ));
     }
@@ -20,14 +21,14 @@ class ManageController extends Controller
     {
         $array = $this->container->getParameter( 'db_manager.entities' );
         $settings = $this->container->getParameter('db_manager.views');
-        $einfo = $this->get('db.manager.checker')->getEntity($array, $name);
+        $eInfo = $this->get('db.manager.checker')->getEntity($array, $name);
 
-        $e = new $einfo['fullPath']();
-        $all = $this->getEntity($einfo);
+        $e = new $eInfo['fullPath']();
+        $all = $this->getEntity($eInfo);
 
         $form = NULL;
-        if ($settings['list']['add'] && $einfo['permission']['add']) {
-            $form = $this->createForm($einfo['fullFormType'], $e);
+        if ($settings['list']['add'] && $eInfo['permission']['add']) {
+            $form = $this->createForm($eInfo['fullFormType'], $e);
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
                 $em = $this->getDoctrine()->getManager();
@@ -39,12 +40,13 @@ class ManageController extends Controller
             $form = $form->createView();
         }
 
-        return $this->render('DBManagerBundle:Manage:entity.html.twig', array(
+        return $this->render($eInfo['mainView'], array(
             'name' => $name,
-            'einfo' => $einfo,
+            'eInfo' => $eInfo,
             'all' => $all,
             'form' => $form,
-            'action' => 'list'
+            'action' => array( 'name' => 'list', 'formType' => 'add'),
+            'settings' => $settings
         ));
     }
 
@@ -52,13 +54,13 @@ class ManageController extends Controller
     {
         $array = $this->container->getParameter( 'db_manager.entities' );
         $settings = $this->container->getParameter('db_manager.views');
-        $einfo = $this->get('db.manager.checker')->getEntity($array, $name);
+        $eInfo = $this->get('db.manager.checker')->getEntity($array, $name);
 
-        if ($settings['list']['add'] || !$einfo['permission']['add'])
+        if ($settings['list']['add'] || !$eInfo['permission']['add'])
             return $this->redirectToRoute('db.manager.list', array('name' => $name));
 
-        $e = new $einfo['fullPath']();
-        $form = $this->createForm($einfo['fullFormType'], $e);
+        $e = new $eInfo['fullPath']();
+        $form = $this->createForm($eInfo['fullFormType'], $e);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
@@ -68,12 +70,13 @@ class ManageController extends Controller
             return $this->redirectToRoute('db.manager.list', array('name' => $name));
         }
 
-        return $this->render('DBManagerBundle:Manage:entity.html.twig', array(
+        return $this->render($eInfo['mainView'], array(
             'name' => $name,
-            'einfo' => $einfo,
+            'eInfo' => $eInfo,
             'all' => NULL,
             'form' => $form->createView(),
-            'action' => 'add'
+            'action' => array( 'name' => 'add', 'formType' => 'add'),
+            'settings' => $settings
         ));
     }
 
@@ -81,16 +84,16 @@ class ManageController extends Controller
     {
         $array = $this->container->getParameter('db_manager.entities');
         $settings = $this->container->getParameter('db_manager.views');
-        $einfo = $this->get('db.manager.checker')->getEntity($array, $name);
-        $this->get('db.manager.checker')->edit($einfo);
+        $eInfo = $this->get('db.manager.checker')->getEntity($array, $name);
+        $this->get('db.manager.checker')->edit($eInfo);
 
-        $all = ($settings['edit']['list']) ? $this->getEntity($einfo) : NULL;
-        $e = $this->getEntity($einfo, $id);
+        $all = ($settings['edit']['list']) ? $this->getEntity($eInfo) : NULL;
+        $e = $this->getEntity($eInfo, $id);
         if (!$e) {
             $this->addFlash('danger','Entity not found');
             return $this->redirectToRoute('db.manager.list', array('name' => $name));
         }
-        $form = $this->createForm($einfo['fullFormType'], $e);
+        $form = $this->createForm($eInfo['fullFormType'], $e);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
@@ -99,22 +102,23 @@ class ManageController extends Controller
             $this->addFlash('success','Your entity have updated');
             return $this->redirectToRoute('db.manager.list', array('name' => $name));
         }
-        return $this->render('DBManagerBundle:Manage:entity.html.twig', array(
+        return $this->render($eInfo['mainView'], array(
             'name' => $name,
-            'einfo' => $einfo,
+            'eInfo' => $eInfo,
             'all' => $all,
             'form' => $form->createView(),
-            'action' => 'edit'
+            'action' => array( 'name' => 'edit', 'formType' => 'edit'),
+            'settings' => $settings
         ));
     }
 
     public function removeAction(Request $request, $name, $id)
     {
         $array = $this->container->getParameter( 'db_manager.entities' );
-        $einfo = $this->get('db.manager.checker')->getEntity($array, $name);
-        $this->get('db.manager.checker')->remove($einfo);
+        $eInfo = $this->get('db.manager.checker')->getEntity($array, $name);
+        $this->get('db.manager.checker')->remove($eInfo);
 
-        $e = $this->getEntity($einfo, $id);
+        $e = $this->getEntity($eInfo, $id);
         if ($e) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($e);
@@ -125,8 +129,8 @@ class ManageController extends Controller
         return $this->redirectToRoute('db.manager.list', array('name' => $name));
     }
 
-    private function getEntity($einfo, $id = NULL) {
-        $repo = $this->getDoctrine()->getRepository($einfo['bundle'].':'.$einfo['name']);
+    private function getEntity($eInfo, $id = NULL) {
+        $repo = $this->getDoctrine()->getRepository($eInfo['bundle'].':'.$eInfo['name']);
         if ($id)
             return $repo->find($id);
         return $repo->findAll();

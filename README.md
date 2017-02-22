@@ -11,7 +11,7 @@ Features include:
     * Remove
 * Personalize interface
 
-`v1.1` `21 FEV 17`
+`v1.2` `22 FEV 17`
 
 ## Installation
 
@@ -88,6 +88,9 @@ You can configure different actions on each entity :
 
      DisplayName:
         fullName: YourBundle:RealName
+        listView: myFile_1.html.twig                        # Optional
+        formView: myFile_2.html.twig                        # Optional
+        mainView: myFile_3.html.twig                        # Optional
         fullPath: YourBundle\Entity\Airport                 # Optional
         formType: AirportEditType                           # Optional
         fullFormType: AnotherBundle\Form\AirportEditType    # Optional
@@ -95,7 +98,13 @@ You can configure different actions on each entity :
 
 By default, DBM load your entity in `YourBundle\Entity\RealName`, name the form with `RealNameType` and load your form type in 
 `YourBundle\Form\formType` (so `YourBundle\Form\RealNameType`)
-`DisplayName` is used by DBM for display on template and in url, you can enter the same name of RealName.
+- `DisplayName` is used by DBM for display on template and in url, you can enter the same name of RealName.
+- `permission` is by default full authorized. This parameter is optional but recommended.
+- You can call your custom views :
+    - `listView` is the view that list the entity.
+    - `formView` is the view that display the form
+    - `mainView` is the view that call `listview` and `formview`.
+
 
 2. Configure views
 
@@ -109,9 +118,12 @@ set the options to `false`.
 
     db_manager:
         views:
+            indexView: index.html.twig
             list:
                 add: false
             edit:
                 list: false
 
 If you do not specify an argument, the argument takes its default value (`true`)
+You can also specify your custom index view with the option `indexView`.
+

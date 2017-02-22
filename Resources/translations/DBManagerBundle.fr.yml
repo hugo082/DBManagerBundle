@@ -1,0 +1,14 @@
+title: Manager de base de donnée
+
+entity:
+    title: Manager %name%
+    name: Nom
+    listing: Liste
+    permissions: Permissions
+    empty: Aucune donnée trouvée.
+    action:
+        add: Ajouter
+        edit: Editer
+        remove: Supprimer
+    form:
+        submit: Soumettre

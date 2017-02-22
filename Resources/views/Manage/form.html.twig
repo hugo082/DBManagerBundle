@@ -1,7 +1,9 @@
-<h3>Add :</h3>
+{% trans_default_domain 'DBManagerBundle' %}
+
+<h3>{{ ('entity.action.'~action.formType)|trans }} :</h3>
 {{ form_start(form) }}
         {% for row in form %}
             {{ form_row(row) }}
         {% endfor %}
-<button type="submit" name="button">Submit</button>
+<button type="submit" name="button">{{ 'entity.form.submit'|trans }}</button>
 {{ form_end(form) }}

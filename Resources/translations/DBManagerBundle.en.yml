@@ -1,0 +1,14 @@
+title: Database manager
+
+entity:
+    title: Manage %name%
+    name: Name
+    listing: Listing
+    permissions: Permissions
+    empty: No data found.
+    action:
+        add: Add
+        edit: Edit
+        remove: Remove
+    form:
+        submit: Submit

@@ -1,4 +1,5 @@
 {% extends '::base.html.twig' %}
+{% trans_default_domain 'DBManagerBundle' %}
 
 {% block body %}
 
@@ -14,20 +15,20 @@
         {% endfor %}
     {% endif %}
 
-    <h1>Manage your database</h1>
+    <h1>{{ 'title'|trans }}</h1>
 
-    <h3>Listing :</h3>
+    <h3>{{ 'entity.listing'|trans }} :</h3>
     <table>
         <tr>
-            <th>Name</th>
-            <th colspan=3>Permissions</th>
+            <th>{{ 'entity.name'|trans }}</th>
+            <th colspan=3>{{ 'entity.permissions'|trans }}</th>
         </tr>
         {% for key, e in entities %}
             <tr>
                 <td><a href="{{ path('db.manager.list', {'name':key})}}">{{ key }}</a></td>
-                <td>{{ e.permission.add ? 'Add' : '-' }}</td>
-                <td>{{ e.permission.edit ? 'Edit' : '-' }}</td>
-                <td>{{ e.permission.remove ? 'Remove' : '-' }}</td>
+                <td>{{ e.permission.add ? 'entity.action.add'|trans : '-' }}</td>
+                <td>{{ e.permission.edit ? 'entity.action.edit'|trans : '-' }}</td>
+                <td>{{ e.permission.remove ? 'entity.action.remove'|trans : '-' }}</td>
             </tr>
         {% endfor %}
     </table>

@@ -36,8 +36,12 @@ class DBManagerExtension extends Extension
      */
     private function loadViews(array $config, ContainerBuilder $container)
     {
-        if (isset($config['views']))
-            $container->setParameter($this->getAlias().'.views', $config['views']);
+        $config['views']['edit']['add'] = true;
+        $config['views']['add']['add'] = true;
+        $config['views']['add']['list'] = false;
+        $config['views']['list']['list'] = true;
+
+        $container->setParameter($this->getAlias().'.views', $config['views']);
     }
 
     /**

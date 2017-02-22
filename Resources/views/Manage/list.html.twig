@@ -1,22 +1,28 @@
-<h3>Listing :</h3>
-<table>
-    <tr>
-        {% for name in all.0.properties %}
-            <th>{{ name }}</th>
-        {% endfor %}
-    </tr>
-    {% for e in all %}
-        <tr>
-            {% for item in e.vars %}
-                <td>{{ item }}</td>
-            {% endfor %}
+{% trans_default_domain 'DBManagerBundle' %}
 
-            {% if einfo.permission.edit %}
-                <td><a href="{{ path('db.manager.edit', {'name':name,'id':e.id})}}">Edit</a></td>
-            {% endif %}
-            {% if einfo.permission.remove %}
-                <td><a href="{{ path('db.manager.remove', {'name':name,'id':e.id})}}">Remove</a></td>
-            {% endif %}
+<h3>{{ 'entity.listing'|trans }} :</h3>
+{% if all is not empty %}
+    <table>
+        <tr>
+            {% for name in all.0.properties %}
+                <th>{{ name }}</th>
+            {% endfor %}
         </tr>
-    {% endfor %}
-</table>
+        {% for e in all %}
+            <tr>
+                {% for item in e.vars %}
+                    <td>{{ item }}</td>
+                {% endfor %}
+
+                {% if eInfo.permission.edit %}
+                    <td><a href="{{ path('db.manager.edit', {'name':name,'id':e.id})}}">{{ 'entity.action.edit'|trans }}</a></td>
+                {% endif %}
+                {% if eInfo.permission.remove %}
+                    <td><a href="{{ path('db.manager.remove', {'name':name,'id':e.id})}}">{{ 'entity.action.remove'|trans }}</a></td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <div>{{ 'entity.empty'|trans }}</div>
+{% endif %}
