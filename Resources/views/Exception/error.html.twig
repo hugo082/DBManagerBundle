@@ -18,11 +18,7 @@
         <h3 class="card-header">An error has occurred : {{ exception.statusCode }}</h3>
         <div class="card-block">
             <h5>{{ exception.title }}</h5>
-            <p>{{ exception.message }}</p>
-            {% if exception.statusCode == 329 %}
-                <p><a class="btn btn-default" href="{{path('book.enabled', {'id': exception.headers.id})}}">Confirm</a></p>
-            {% endif %}
-            <p><a href="{{path('homepage')}}">Back</a></p>
+            <p>{{ exception.message|raw }}</p>
         </div>
     </div>
 

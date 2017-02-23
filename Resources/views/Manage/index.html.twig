@@ -26,9 +26,9 @@
         {% for key, e in entities %}
             <tr>
                 <td><a href="{{ path('db.manager.list', {'name':key})}}">{{ key }}</a></td>
-                <td>{{ e.permission.add ? 'entity.action.add'|trans : '-' }}</td>
-                <td>{{ e.permission.edit ? 'entity.action.edit'|trans : '-' }}</td>
-                <td>{{ e.permission.remove ? 'entity.action.remove'|trans : '-' }}</td>
+                <td>{{ e.permissions.add ? 'entity.action.add'|trans : '-' }}</td>
+                <td>{{ e.permissions.edit ? 'entity.action.edit'|trans : '-' }}</td>
+                <td>{{ e.permissions.remove ? 'entity.action.remove'|trans : '-' }}</td>
             </tr>
         {% endfor %}
     </table>

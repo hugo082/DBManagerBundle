@@ -3,7 +3,6 @@
 namespace DB\ManagerBundle\EventListener;
 
 use DB\ManagerBundle\Exception\ExceptionInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -11,10 +10,12 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 class ExceptionListener
 {
     protected $twig;
+    protected $environment;
 
-    public function __construct(\Twig_Environment $twig)
+    public function __construct(\Twig_Environment $twig, string $environment)
     {
         $this->twig = $twig;
+        $this->environment = $environment;
     }
 
     public function onKernelException(GetResponseForExceptionEvent $event)
@@ -27,12 +28,15 @@ class ExceptionListener
 
         $responseData = [
             'exception' => [
-                'title' => $exception->getTitle(),
+                'title' => $exception->getTitle($this->environment),
                 'message' => $exception->getMessage(),
-                'statusCode' => $exception->getStatusCode(),
-                'headers' => $exception->getHeaders()
+                'statusCode' => $exception->getStatusCode($this->environment),
+                'headers' => $exception->getHeaders($this->environment)
             ]
         ];
+
+        if ($this->environment != 'prod')
+            $responseData['exception']['message'] = $exception->getDevMessage();
 
         $content = $this->twig->render('DBManagerBundle:Exception:error.html.twig', $responseData);
 
