@@ -6,6 +6,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
+use DB\ManagerBundle\DependencyInjection\Configuration;
 
 /**
  * This is the class that loads and manages your bundle configuration.
@@ -24,7 +25,7 @@ class DBManagerExtension extends Extension
 
 
         $this->loadViews($config, $container);
-        $this->loadEntities($config, $container, $configuration->permissions);
+        $this->loadEntities($config, $container, Configuration::PERMISSIONS);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
@@ -36,10 +37,12 @@ class DBManagerExtension extends Extension
      */
     private function loadViews(array $config, ContainerBuilder $container)
     {
-        $config['views']['edit']['add'] = true;
-        $config['views']['add']['add'] = true;
-        $config['views']['add']['list'] = false;
-        $config['views']['list']['list'] = true;
+        $config['views'][Configuration::PERM_EDIT][Configuration::DISP_ELEM_FORM] = true;
+        $config['views'][Configuration::PERM_ADD][Configuration::DISP_ELEM_FORM] = true;
+        $config['views'][Configuration::PERM_ADD][Configuration::DISP_ELEM_LIST] = false;
+        $config['views'][Configuration::PERM_LIST][Configuration::DISP_ELEM_LIST] = true;
+        $config['views'][Configuration::PERM_REMOVE][Configuration::DISP_ELEM_FORM] = false;
+        $config['views'][Configuration::PERM_REMOVE][Configuration::DISP_ELEM_LIST] = false;
 
         $container->setParameter($this->getAlias().'.views', $config['views']);
     }
@@ -67,8 +70,14 @@ class DBManagerExtension extends Extension
 
             $tmp = array();
             foreach ($permissions as $p)
-                $tmp[$p] = in_array($p, $values['permission']);
-            $values['permission'] = $tmp;
+                $tmp[$p] = in_array($p, $values['permissions']);
+            $values['permissions'] = $tmp;
+
+            if (!isset($values['access']) || empty($values['access']))
+                $values['access'] = NULL;
+
+            if (!isset($values['access_details']) || empty($values['access_details']))
+                $values['access_details'] = NULL;
 
             $config['entities'][$name] = $values;
         }

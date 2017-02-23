@@ -13,7 +13,17 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 class Configuration implements ConfigurationInterface
 {
-    public $permissions = array('add', 'edit', 'remove');
+    public const PERM_ADD = 'add';
+    public const PERM_EDIT = 'edit';
+    public const PERM_REMOVE = 'remove';
+    public const PERM_LIST = 'list';
+    public const PERMISSIONS = array(Configuration::PERM_ADD, Configuration::PERM_EDIT, Configuration::PERM_REMOVE, Configuration::PERM_LIST);
+
+    public const DISP_ELEM_FORM = 'form';
+    public const DISP_ELEM_LIST = 'list';
+    public const DISP_ELEM_ADDLINK = 'addLink';
+    public const DISP_ELEM_REMOVELINK = 'removeLink';
+    public const DISP_ELEM_EDITLINK = 'editLink';
 
     /**
      * {@inheritdoc}
@@ -44,13 +54,13 @@ class Configuration implements ConfigurationInterface
                         ->arrayNode('list')
                         ->addDefaultsIfNotSet()
                             ->children()
-                                ->booleanNode('add')->defaultTrue()->end()
+                                ->booleanNode(Configuration::DISP_ELEM_FORM)->defaultTrue()->end()
                             ->end()
                         ->end()
                         ->arrayNode('edit')
                         ->addDefaultsIfNotSet()
                             ->children()
-                                ->booleanNode('list')->defaultTrue()->end()
+                                ->booleanNode(Configuration::DISP_ELEM_LIST)->defaultTrue()->end()
                             ->end()
                         ->end()
                     ->end()
@@ -83,10 +93,49 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('listView')->defaultValue('DBManagerBundle:Manage:list.html.twig')->end() // Auto
                             ->scalarNode('formView')->defaultValue('DBManagerBundle:Manage:form.html.twig')->end() // Auto
                             ->scalarNode('mainView')->defaultValue('DBManagerBundle:Manage:entity.html.twig')->end() // Auto
-                            ->arrayNode('permission')
-                                ->defaultValue($this->permissions)
+                            ->arrayNode('permissions')
+                                ->defaultValue(Configuration::PERMISSIONS)
                                 ->prototype('enum')
-                                    ->values($this->permissions)
+                                    ->values(Configuration::PERMISSIONS)
+                                ->end()
+                            ->end()
+                            ->arrayNode('access')
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function ($v) { return array($v); })
+                                ->end()
+                                ->prototype('scalar')->end()
+                            ->end()
+                            ->arrayNode('access_details')
+                                ->children()
+                                    ->arrayNode(Configuration::PERM_ADD)->isRequired()
+                                        ->beforeNormalization()
+                                            ->ifString()
+                                            ->then(function ($v) { return array($v); })
+                                        ->end()
+                                        ->prototype('scalar')->end()
+                                    ->end()
+                                    ->arrayNode(Configuration::PERM_EDIT)->isRequired()
+                                        ->beforeNormalization()
+                                            ->ifString()
+                                            ->then(function ($v) { return array($v); })
+                                        ->end()
+                                        ->prototype('scalar')->end()
+                                    ->end()
+                                    ->arrayNode(Configuration::PERM_REMOVE)->isRequired()
+                                        ->beforeNormalization()
+                                            ->ifString()
+                                            ->then(function ($v) { return array($v); })
+                                        ->end()
+                                        ->prototype('scalar')->end()
+                                    ->end()
+                                    ->arrayNode(Configuration::PERM_LIST)->isRequired()
+                                        ->beforeNormalization()
+                                            ->ifString()
+                                            ->then(function ($v) { return array($v); })
+                                        ->end()
+                                        ->prototype('scalar')->end()
+                                    ->end()
                                 ->end()
                             ->end()
                         ->end()

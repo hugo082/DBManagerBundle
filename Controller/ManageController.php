@@ -5,13 +5,15 @@ namespace DB\ManagerBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use DB\ManagerBundle\DependencyInjection\Configuration;
 
 class ManageController extends Controller
 {
     public function indexAction()
     {
-        $entities = $this->container->getParameter( 'db_manager.entities' );
+        $entities = $this->getEntities();
         $settings = $this->container->getParameter('db_manager.views');
+
         return $this->render($settings['indexView'], array(
             'entities' => $entities
         ));
@@ -21,13 +23,13 @@ class ManageController extends Controller
     {
         $array = $this->container->getParameter( 'db_manager.entities' );
         $settings = $this->container->getParameter('db_manager.views');
-        $eInfo = $this->get('db.manager.checker')->getEntity($array, $name);
+        $eInfo = $this->get('db.manager.checker')->getEntity($settings, $array, $name, Configuration::PERM_LIST);
 
         $e = new $eInfo['fullPath']();
         $all = $this->getEntity($eInfo);
 
         $form = NULL;
-        if ($settings['list']['add'] && $eInfo['permission']['add']) {
+        if ($eInfo['displayElements'][Configuration::DISP_ELEM_FORM]) {
             $form = $this->createForm($eInfo['fullFormType'], $e);
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
@@ -54,7 +56,7 @@ class ManageController extends Controller
     {
         $array = $this->container->getParameter( 'db_manager.entities' );
         $settings = $this->container->getParameter('db_manager.views');
-        $eInfo = $this->get('db.manager.checker')->getEntity($array, $name);
+        $eInfo = $this->get('db.manager.checker')->getEntity($settings, $array, $name, Configuration::PERM_ADD);
 
         if ($settings['list']['add'] || !$eInfo['permission']['add'])
             return $this->redirectToRoute('db.manager.list', array('name' => $name));
@@ -84,8 +86,7 @@ class ManageController extends Controller
     {
         $array = $this->container->getParameter('db_manager.entities');
         $settings = $this->container->getParameter('db_manager.views');
-        $eInfo = $this->get('db.manager.checker')->getEntity($array, $name);
-        $this->get('db.manager.checker')->edit($eInfo);
+        $eInfo = $this->get('db.manager.checker')->getEntity($settings, $array, $name, Configuration::PERM_EDIT);
 
         $all = ($settings['edit']['list']) ? $this->getEntity($eInfo) : NULL;
         $e = $this->getEntity($eInfo, $id);
@@ -115,8 +116,8 @@ class ManageController extends Controller
     public function removeAction(Request $request, $name, $id)
     {
         $array = $this->container->getParameter( 'db_manager.entities' );
-        $eInfo = $this->get('db.manager.checker')->getEntity($array, $name);
-        $this->get('db.manager.checker')->remove($eInfo);
+        $settings = $this->container->getParameter('db_manager.views');
+        $eInfo = $this->get('db.manager.checker')->getEntity($settings, $array, $name, Configuration::PERM_REMOVE);
 
         $e = $this->getEntity($eInfo, $id);
         if ($e) {
@@ -129,10 +130,26 @@ class ManageController extends Controller
         return $this->redirectToRoute('db.manager.list', array('name' => $name));
     }
 
+    /**
+     * Get
+     * @param $eInfo
+     * @param null $id
+     * @return null|object
+     */
     private function getEntity($eInfo, $id = NULL) {
         $repo = $this->getDoctrine()->getRepository($eInfo['bundle'].':'.$eInfo['name']);
         if ($id)
             return $repo->find($id);
         return $repo->findAll();
+    }
+
+    /**
+     * Return all entities that current user can interact.
+     * @return array
+     */
+    private function getEntities() {
+        $entities = $this->container->getParameter('db_manager.entities');
+        $entities = $this->get('db.manager.checker')->accessFilter($entities);
+        return $entities;
     }
 }

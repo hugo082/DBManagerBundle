@@ -14,10 +14,10 @@
                     <td>{{ item }}</td>
                 {% endfor %}
 
-                {% if eInfo.permission.edit %}
+                {% if eInfo.displayElements.list.editLink %}
                     <td><a href="{{ path('db.manager.edit', {'name':name,'id':e.id})}}">{{ 'entity.action.edit'|trans }}</a></td>
                 {% endif %}
-                {% if eInfo.permission.remove %}
+                {% if eInfo.displayElements.list.removeLink %}
                     <td><a href="{{ path('db.manager.remove', {'name':name,'id':e.id})}}">{{ 'entity.action.remove'|trans }}</a></td>
                 {% endif %}
             </tr>

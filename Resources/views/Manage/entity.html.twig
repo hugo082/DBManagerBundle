@@ -17,13 +17,13 @@
 
     <h1>{{ 'entity.title'|trans({'%name%': name}) }}</h1>
 
-    {% if settings[action.name].list %}
+    {% if eInfo.displayElements.list.full %}
         {% include eInfo.listView %}
     {% endif %}
 
-    {% if settings[action.name].add %}
+    {% if eInfo.displayElements.form.full %}
         {% include eInfo.formView %}
-    {% elseif action.name == 'list' and eInfo.permission.add %}
+    {% elseif eInfo.displayElements.form.addLink %}
         <a href="{{ path('db.manager.add', {'name':name}) }}">{{ 'entity.action.add'|trans }}</a>
     {% endif %}
 
