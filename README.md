@@ -104,7 +104,7 @@ By default, DBM load your entity in `YourBundle\Entity\RealName`, name the form 
     - `formView` is the view that display the form
     - `mainView` is the view that call `listview` and `formview`.
 
-<span style="color:#FFC107">WARNING :</span> if you do not override views, your entity must be compatible with default views.
+<span style="color:#FFC107">**WARNING** :</span> if you do not override views, your entity must be compatible with default views.
 To do that, you can extends your entity with `DB\ManagerBundle\Model\BaseManager` class. This abstract class implement necessary methods.<br>
 If your entity is already extended, you can also implements all necessary interface :
 - DB\ManagerBundle\Model\ListingInterface
@@ -155,8 +155,8 @@ you can defined the parameter `access_details`. This parameter **must** defined 
             remove: ROLE_SUPER_ADMIN
             list: ROLE_USER
 
-<span style="color:#FFC107">WARNING :</span> if you defined the access_details property, this parameter override access 
+<span style="color:#FFC107">**WARNING** :</span> if you defined the access_details property, this parameter override access 
 and so access is no longer taken into consideration.<br>
-<span style="color:#FFC107">WARNING :</span> if list action isn't accessible for a user, this user don't have access to
+<span style="color:#FFC107">**WARNING** :</span> if list action isn't accessible for a user, this user don't have access to
  `.../DisplayName` url, so it can't access to add path/form. Moreover, if it can't list entity, it can't click on links 
  to remove or edit, but, the link is accessible. 

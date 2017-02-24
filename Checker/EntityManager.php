@@ -90,7 +90,11 @@ class EntityManager
             return false;
         } elseif ($entity['access'] != NULL)
             return $this->grantedRoles($entity['access']);
-        return true;
+        foreach (Configuration::PERMISSIONS as $perm) {
+            if ($entity['permissions'][$perm])
+                return true;
+        }
+        return false;
     }
 
     /**

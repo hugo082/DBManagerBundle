@@ -10,5 +10,6 @@ entity:
         add: Ajouter
         edit: Editer
         remove: Supprimer
+        list: Lister
     form:
         submit: Soumettre

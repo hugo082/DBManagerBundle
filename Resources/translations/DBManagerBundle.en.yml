@@ -10,5 +10,6 @@ entity:
         add: Add
         edit: Edit
         remove: Remove
+        list: List
     form:
         submit: Submit

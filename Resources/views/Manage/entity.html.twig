@@ -16,6 +16,7 @@
     {% endif %}
 
     <h1>{{ 'entity.title'|trans({'%name%': name}) }}</h1>
+    <a href="{{ path('db.manager') }}">Main</a>
 
     {% if eInfo.displayElements.list.full %}
         {% include eInfo.listView %}
