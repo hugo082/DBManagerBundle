@@ -10,7 +10,7 @@ Features include:
     * Remove
 * Personalize interface
 
-`v1.2` `22 FEV 17`
+`v1.3` `24 FEV 17`
 
 ## Installation
 
@@ -160,3 +160,5 @@ and so access is no longer taken into consideration.<br>
 <span style="color:#FFC107">**WARNING** :</span> if list action isn't accessible for a user, this user don't have access to
  `.../DisplayName` url, so it can't access to add path/form. Moreover, if it can't list entity, it can't click on links 
  to remove or edit, but, the link is accessible. 
+<span style="color:#FFC107">**WARNING** :</span> if FOSUserBundle does not installed or enabled, `access` and `access_details`
+parameters will be ignored.
