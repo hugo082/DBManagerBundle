@@ -181,3 +181,11 @@ Your method must a static method and take in parameters user and entity object. 
     public static function checkAdd(User $user, Flight $obj = NULL) {
         return $user->isUnabled();
     }
+
+When DBM list your entity, you can also choose your method repository. By default, DBManager use `findAll()` but you can 
+override this easily :
+
+    Flight:
+        fullName: AppBundle:Flight
+        listingMethod: myRepositoryMethod
+
