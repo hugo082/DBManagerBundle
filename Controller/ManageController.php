@@ -24,10 +24,10 @@ class ManageController extends Controller
         $eInfo = $checker->getEntity($name, Configuration::PERM_LIST);
 
         $e = new $eInfo['fullPath']();
-        $all = $this->getEntity($eInfo);
+        $all = $checker->getEntityObject($eInfo);
 
         $form = NULL;
-        if ($eInfo['displayElements'][Configuration::DISP_ELEM_FORM]) {
+        if ($eInfo['displayElements'][Configuration::DISP_ELEM_FORM]['full']) {
             $form = $this->createForm($eInfo['fullFormType'], $e);
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
@@ -54,6 +54,7 @@ class ManageController extends Controller
     {
         $checker = $this->get('db.manager.checker');
         $eInfo = $checker->getEntity($name, Configuration::PERM_ADD);
+        $checker->checkObjectPermission($eInfo, NULL, Configuration::PERM_ADD);
 
         $e = new $eInfo['fullPath']();
         $form = $this->createForm($eInfo['fullFormType'], $e);
@@ -81,8 +82,8 @@ class ManageController extends Controller
         $checker = $this->get('db.manager.checker');
         $eInfo = $checker->getEntity($name, Configuration::PERM_EDIT);
 
-        $all = $this->getEntity($eInfo);
-        $e = $this->getEntity($eInfo, $id);
+        $all = $checker->getEntityObject($eInfo);
+        $e = $checker->getEntityObject($eInfo, Configuration::PERM_EDIT, $id);
         if (!$e) {
             $this->addFlash('danger','Entity not found');
             return $this->redirectToRoute('db.manager.list', array('name' => $name));
@@ -111,7 +112,7 @@ class ManageController extends Controller
         $checker = $this->get('db.manager.checker');
         $eInfo = $checker->getEntity($name, Configuration::PERM_REMOVE);
 
-        $e = $this->getEntity($eInfo, $id);
+        $e = $checker->getEntityObject($eInfo, Configuration::PERM_REMOVE, $id);
         if ($e) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($e);
@@ -120,18 +121,5 @@ class ManageController extends Controller
         } else
             $this->addFlash('danger','Your entity could not be deleted');
         return $this->redirectToRoute('db.manager.list', array('name' => $name));
-    }
-
-    /**
-     * Get
-     * @param $eInfo
-     * @param null $id
-     * @return null|object|array
-     */
-    private function getEntity($eInfo, $id = NULL) {
-        $repo = $this->getDoctrine()->getRepository($eInfo['bundle'].':'.$eInfo['name']);
-        if ($id)
-            return $repo->find($id);
-        return $repo->findAll();
     }
 }

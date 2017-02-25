@@ -10,11 +10,11 @@ Features include:
     * Remove
 * Personalize interface
 
-`v1.3` `24 FEV 17`
+`v1.4` `25 FEV 17`
 
 ## Installation
 
-#### Composer requirement
+### Step 1: Composer requirement
 
 Add repositories to your `composer.json`
 
@@ -35,7 +35,7 @@ Add requirement :
 
 Update your requirements with `composer update` command.
 
-#### Bundle configuration
+### Step 2: Bundle configuration
 
 Enable the bundle in the kernel :
 
@@ -74,7 +74,7 @@ This bundle is under the MIT license. See the complete license [in the bundle](L
 
 ## Documentation
 
-1. **Add an entity**
+### Add an entity
 
 DBM load your entities with your configuration file. You can specify an entity to follow by adding it in your config.yml
 
@@ -109,7 +109,7 @@ To do that, you can extends your entity with `DB\ManagerBundle\Model\BaseManager
 If your entity is already extended, you can also implements all necessary interface :
 - DB\ManagerBundle\Model\ListingInterface
 
-2. **Configure views**
+### Configure views
 
 You can configure your views by adding the `views` keyword in your configuration file.
 
@@ -130,7 +130,9 @@ set the options to `false`.
 If you do not specify an argument, the argument takes its default value (`true`)
 You can also specify your custom index view with the option `indexView`.
 
-3. **Entity access**
+### Entity access
+
+#### Role access
 
 You can setup for each entity roles that are necessary to execute specific action or access to a specific information.<br>
 For example, if you want that the entity is accessible only to admin users, you can specify the `access` config
@@ -159,6 +161,23 @@ you can defined the parameter `access_details`. This parameter **must** defined 
 and so access is no longer taken into consideration.<br>
 <span style="color:#FFC107">**WARNING** :</span> if list action isn't accessible for a user, this user don't have access to
  `.../DisplayName` url, so it can't access to add path/form. Moreover, if it can't list entity, it can't click on links 
- to remove or edit, but, the link is accessible. 
+ to remove or edit, but, the link is accessible.<br>
 <span style="color:#FFC107">**WARNING** :</span> if FOSUserBundle does not installed or enabled, `access` and `access_details`
 parameters will be ignored.
+
+
+#### Custom constraints
+
+You can implement an actionMethod to process a custom constraint. Your method will call for each entity and must return
+a boolean (`true` to allow access and `false` to prevent).
+
+    access_details:
+        add: ROLE_USER
+        addMethod: AppBundle\Entity\Flight::checkAdd
+        #...
+
+Your method must a static method and take in parameters user and entity object. For the addMethod, entity object is NULL.
+
+    public static function checkAdd(User $user, Flight $obj = NULL) {
+        return $user->isUnabled();
+    }

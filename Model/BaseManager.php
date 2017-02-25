@@ -36,8 +36,13 @@ abstract class BaseManager implements ListingEntityInterface
         foreach ($methods as $met) {
             $metName = $met->getName();
             if (0 === strpos($metName, 'get') && !in_array($metName, $this->bloquedMethods)) {
-                if ($execute)
-                    $tmp[] = $this->$metName();
+                if ($execute) {
+                    $item = $this->$metName();
+                    if (!is_array($item) && (!is_object($item) && settype($item, 'string') !== false ) || is_object($item) && method_exists($item, '__toString'))
+                        $tmp[] = $item;
+                    else
+                        $tmp[] = "Unknown";
+                }
                 else
                     $tmp[] = str_replace('get', '', $metName);
             }

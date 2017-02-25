@@ -4,21 +4,21 @@
 {% if all is not empty %}
     <table>
         <tr>
-            {% for name in all.0.properties %}
+            {% for name in all.0.obj.properties %}
                 <th>{{ name }}</th>
             {% endfor %}
         </tr>
         {% for e in all %}
             <tr>
-                {% for item in e.vars %}
+                {% for item in e.obj.vars %}
                     <td>{{ item }}</td>
                 {% endfor %}
 
-                {% if eInfo.displayElements.list.editLink %}
-                    <td><a href="{{ path('db.manager.edit', {'name':name,'id':e.id})}}">{{ 'entity.action.edit'|trans }}</a></td>
+                {% if eInfo.displayElements.list.editLink and e.permissions.edit %}
+                    <td><a href="{{ path('db.manager.edit', {'name':name,'id':e.obj.id})}}">{{ 'entity.action.edit'|trans }}</a></td>
                 {% endif %}
-                {% if eInfo.displayElements.list.removeLink %}
-                    <td><a href="{{ path('db.manager.remove', {'name':name,'id':e.id})}}">{{ 'entity.action.remove'|trans }}</a></td>
+                {% if eInfo.displayElements.list.removeLink and e.permissions.remove %}
+                    <td><a href="{{ path('db.manager.remove', {'name':name,'id':e.obj.id})}}">{{ 'entity.action.remove'|trans }}</a></td>
                 {% endif %}
             </tr>
         {% endfor %}

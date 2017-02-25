@@ -1,7 +1,7 @@
 services:
     db.manager.checker:
         class: DB\ManagerBundle\Checker\EntityManager
-        arguments: [ "@security.authorization_checker", "@security.token_storage", "%db_manager.views%","%db_manager.entities%" ]
+        arguments: [ "@doctrine.orm.entity_manager", "@security.authorization_checker", "@security.token_storage", "%db_manager.views%","%db_manager.entities%" ]
     db.manager.exception.listener:
         class: DB\ManagerBundle\EventListener\ExceptionListener
         arguments: [ "@twig", "%kernel.environment%" ]

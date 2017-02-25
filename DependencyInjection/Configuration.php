@@ -93,6 +93,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('listView')->defaultValue('DBManagerBundle:Manage:list.html.twig')->end() // Auto
                             ->scalarNode('formView')->defaultValue('DBManagerBundle:Manage:form.html.twig')->end() // Auto
                             ->scalarNode('mainView')->defaultValue('DBManagerBundle:Manage:entity.html.twig')->end() // Auto
+                            ->scalarNode('listingMethod')->defaultNull()->end() // Auto
                             ->arrayNode('permissions')
                                 ->defaultValue(Configuration::PERMISSIONS)
                                 ->prototype('enum')
@@ -108,6 +109,7 @@ class Configuration implements ConfigurationInterface
                             ->end()
                             ->arrayNode('access_details')
                                 ->children()
+                                    ->scalarNode(Configuration::PERM_ADD.'Method')->defaultNull()->end() // Auto
                                     ->arrayNode(Configuration::PERM_ADD)->isRequired()
                                         ->beforeNormalization()
                                             ->ifString()
@@ -115,6 +117,7 @@ class Configuration implements ConfigurationInterface
                                         ->end()
                                         ->prototype('scalar')->end()
                                     ->end()
+                                    ->scalarNode(Configuration::PERM_EDIT.'Method')->defaultNull()->end() // Auto
                                     ->arrayNode(Configuration::PERM_EDIT)->isRequired()
                                         ->beforeNormalization()
                                             ->ifString()
@@ -122,6 +125,7 @@ class Configuration implements ConfigurationInterface
                                         ->end()
                                         ->prototype('scalar')->end()
                                     ->end()
+                                    ->scalarNode(Configuration::PERM_REMOVE.'Method')->defaultNull()->end() // Auto
                                     ->arrayNode(Configuration::PERM_REMOVE)->isRequired()
                                         ->beforeNormalization()
                                             ->ifString()
@@ -129,6 +133,7 @@ class Configuration implements ConfigurationInterface
                                         ->end()
                                         ->prototype('scalar')->end()
                                     ->end()
+                                    ->scalarNode(Configuration::PERM_LIST.'Method')->defaultNull()->end() // Auto
                                     ->arrayNode(Configuration::PERM_LIST)->isRequired()
                                         ->beforeNormalization()
                                             ->ifString()

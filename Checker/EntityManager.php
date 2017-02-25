@@ -2,9 +2,10 @@
 
 namespace DB\ManagerBundle\Checker;
 
+use Doctrine\ORM\EntityManager as ORMManager;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
-use DB\ManagerBundle\DependencyInjection\Configuration;
+use DB\ManagerBundle\DependencyInjection\Configuration as Conf;
 
 use DB\ManagerBundle\Exception\NotFoundException;
 use DB\ManagerBundle\Exception\NotAllowedException;
@@ -15,9 +16,11 @@ class EntityManager
     private $token;
     private $settings;
     private $entities;
+    private $em;
 
-    public function __construct(AuthorizationChecker $context, TokenStorage $token, array $settings, array $entities)
+    public function __construct(ORMManager $em, AuthorizationChecker $context, TokenStorage $token, array $settings, array $entities)
     {
+        $this->em = $em;
         $this->context = $context;
         $this->token = $token;
         $this->settings = $settings;
@@ -52,6 +55,77 @@ class EntityManager
     }
 
     /**
+     * Return entity or entities and check his permissions with action
+     * @param array $eInfo
+     * @param string|NULL $action
+     * @param int|NULL $id
+     * @return array|null|object
+     * @throws NotAllowedException
+     */
+    public function getEntityObject(array $eInfo, string $action = NULL, int $id = NULL) {
+        $repo = $this->em->getRepository($eInfo['bundle'].':'.$eInfo['name']);
+        if ($id) {
+            $obj = $repo->find($id);
+            $this->checkObjectPermission($eInfo, $obj, $action);
+            return $obj;
+        }
+        elseif ($eInfo['listingMethod'] != NULL) {
+            $name = $eInfo['listingMethod'];
+            $all = $repo->$name($this->getUser());
+        } else
+            $all = $repo->findAll();
+        $res = array();
+        foreach ($all as $e) {
+            if (($a = $this->setObjectPermissions($eInfo, $e))['permissions'][Conf::PERM_LIST])
+                $res[] = $a;
+        }
+        return $res;
+    }
+
+
+    /**
+     * Check if current user can execute action on object
+     * @param array $eInfo
+     * @param $obj
+     * @param string $action
+     * @return bool
+     * @throws NotAllowedException
+     */
+    public function checkObjectPermission(array $eInfo, $obj, string $action) {
+        if ($action == NULL || !$this->getObjectPermission($eInfo, $obj, $action))
+            throw new NotAllowedException($eInfo);
+        return true;
+    }
+
+    /**
+     * Configure object custom methods permissions
+     * @param array $eInfo
+     * @param object $obj
+     * @return array
+     */
+    private function setObjectPermissions(array $eInfo, $obj) {
+        $permissions = array();
+        foreach (Conf::PERMISSIONS as $p)
+            $permissions[$p] = $this->getObjectPermission($eInfo,$obj, $p);
+        return array(
+            'permissions' => $permissions,
+            'obj' => $obj
+        );
+    }
+
+    /**
+     * @param array $eInfo
+     * @param $obj
+     * @param string $action
+     * @return bool
+     */
+    private function getObjectPermission(array $eInfo, $obj, string $action) {
+        if (($m = $eInfo['access_details'][$action.'Method']) == NULL)
+            return true;
+        return $m($this->getUser(), $obj);
+    }
+
+    /**
      * Compute current displayable elements for entity / user / action
      * WARNING : don't check $eInfo['permissions'][$action]
      * @param array $entity
@@ -59,22 +133,22 @@ class EntityManager
      * @return array
      */
     private function getDisplayPermissions(array $entity, string $action) {
-        $formAction = ($action == Configuration::PERM_LIST) ? Configuration::PERM_ADD : $action;
+        $formAction = ($action == Conf::PERM_LIST) ? Conf::PERM_ADD : $action;
         return array(
-            Configuration::DISP_ELEM_FORM => array(
-                'full' => $full = $this->settings[$action][Configuration::DISP_ELEM_FORM] && $this->entityAccess($entity, $formAction),
-                Configuration::DISP_ELEM_ADDLINK => !$full and $entity['permissions'][$formAction] && $formAction != $action && $this->entityAccess($entity, $formAction)
+            Conf::DISP_ELEM_FORM => array(
+                'full' => $full = $this->settings[$action][Conf::DISP_ELEM_FORM] && $this->entityAccess($entity, $formAction),
+                Conf::DISP_ELEM_ADDLINK => !$full and $entity['permissions'][$formAction] && $formAction != $action && $this->entityAccess($entity, $formAction)
             ),
-            Configuration::DISP_ELEM_LIST => array(
-                'full' => $full = $this->settings[$action][Configuration::DISP_ELEM_LIST] and $this->entityAccess($entity, Configuration::PERM_LIST),
-                Configuration::DISP_ELEM_EDITLINK => $full and $entity['permissions'][Configuration::PERM_EDIT] and $this->entityAccess($entity, Configuration::PERM_EDIT),
-                Configuration::DISP_ELEM_REMOVELINK => $full and $entity['permissions'][Configuration::PERM_REMOVE] and $this->entityAccess($entity, Configuration::PERM_REMOVE)
+            Conf::DISP_ELEM_LIST => array(
+                'full' => $full = $this->settings[$action][Conf::DISP_ELEM_LIST] and $this->entityAccess($entity, Conf::PERM_LIST),
+                Conf::DISP_ELEM_EDITLINK => $full and $entity['permissions'][Conf::PERM_EDIT] and $this->entityAccess($entity, Conf::PERM_EDIT),
+                Conf::DISP_ELEM_REMOVELINK => $full and $entity['permissions'][Conf::PERM_REMOVE] and $this->entityAccess($entity, Conf::PERM_REMOVE)
             )
         );
     }
 
     /**
-     * Check if current user have access to $entity
+     * Check if current user have access to $entity with entityInfo
      * @param $entity
      * @param $action
      * @return bool
@@ -83,14 +157,14 @@ class EntityManager
         if ($entity['access_details'] != NULL) {
             if ($action != NULL)
                 return $this->grantedRoles($entity['access_details'][$action]);
-            foreach (Configuration::PERMISSIONS as $perm) {
+            foreach (Conf::PERMISSIONS as $perm) {
                 if ($this->grantedRoles($entity['access_details'][$perm]))
                     return true;
             }
             return false;
         } elseif ($entity['access'] != NULL)
             return $this->grantedRoles($entity['access']);
-        foreach (Configuration::PERMISSIONS as $perm) {
+        foreach (Conf::PERMISSIONS as $perm) {
             if ($entity['permissions'][$perm])
                 return true;
         }
@@ -116,5 +190,14 @@ class EntityManager
      */
     public function getSettings(){
         return $this->settings;
+    }
+
+    /**
+     * Get current user
+     * @return mixed
+     */
+    private function getUser()
+    {
+        return $this->token->getToken()->getUser();
     }
 }

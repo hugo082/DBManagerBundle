@@ -23,7 +23,8 @@ class NotAllowedException extends \Exception implements ExceptionInterface
         $this->devTitle = "Impossible to execute this action on " . $eInfo['fullName'];
         $this->devMessage = "The roles of the current user may not be 
         sufficient or that the action is not allowed on this entity. <br>
-        For more information, look the dump above.";
+        For more information, look the dumps above.<br>
+        If all boolean on dumps are incoherent with this exception, check the result of actionMethod.";
 
         parent::__construct($message, 0, null);
     }
