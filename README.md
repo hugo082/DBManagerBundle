@@ -189,3 +189,45 @@ override this easily :
         fullName: AppBundle:Flight
         listingMethod: myRepositoryMethod
 
+
+#### Events
+
+For add, edit and remove actions, events are called. You can listen them and execute a custom process :
+
+    namespace AppBundle\EventListener;
+    
+    use AppBundle\Entity\Flight;
+    use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+    use Doctrine\ORM\EntityManager;
+    use DB\ManagerBundle\DBManagerEvents;
+    use DB\ManagerBundle\Event\ActionEvent;
+
+    class ActionSubscriber implements EventSubscriberInterface {
+        private $em;
+
+        public function __construct(EntityManager $em) {
+            $this->em = $em;
+        }
+
+        public static function getSubscribedEvents() {
+            return array(
+                DBManagerEvents::ACTION_REMOVE_BEFORE => 'beforeRemove',
+                //..
+            );
+        }
+
+        public function beforeRemove(ActionEvent $event) {
+            $e = $event->getEntityObject();
+            if ($e instanceof Flight) {
+                if ($e->getId() == 13) {
+                    $event->setExecuted(true); // DBM default action ignored
+                    $event->setFlash('ERROR', 'You want remove VIP Flight');
+                } else
+                    $event->setFlash('SUCCESS', 'Your Flight have been removed');
+            }
+        }
+    }
+
+At the end of your process, if `executed` property of event are set to true, DBM will ignore the default action. By default,
+the `executed` property is set to false.<br>
+Of course you must register your subscriber in your services.
