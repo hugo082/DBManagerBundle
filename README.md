@@ -10,7 +10,7 @@ Features include:
     * Remove
 * Personalize interface
 
-`v1.4` `25 FEV 17`
+`v1.5` `25 FEV 17`
 
 ## Installation
 
