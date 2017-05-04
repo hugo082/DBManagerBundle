@@ -18,9 +18,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as Dispatcher;
 
 use FQT\DBCoreManagerBundle\FQTDBCoreManagerEvents as DBCMEvents;
-use FQT\DBCoreManagerBundle\DependencyInjection\Configuration;
+use FQT\DBCoreManagerBundle\DependencyInjection\Configuration as Conf;
 use FQT\DBCoreManagerBundle\Event\ActionEvent;
 use FQT\DBCoreManagerBundle\Checker\EntityManager as Checker;
+use FQT\DBCoreManagerBundle\Checker\ActionManager;
 
 class ManageController extends Controller
 {
@@ -37,139 +38,75 @@ class ManageController extends Controller
 
     public function listAction(Request $request, $name)
     {
-        /** @var $dispatcher Dispatcher */
-        $dispatcher = $this->get('event_dispatcher');
-        /** @var $checker Checker */
-        $checker = $this->get('fqt.dbcm.checker');
-        $eInfo = $checker->getEntity($name, Configuration::PERM_LIST);
-
-        $e = new $eInfo['fullPath']();
-        $all = $checker->getEntityObject($eInfo);
+        /** @var $checker ActionManager */
+        $actionManager = $this->get('fqt.dbcm.manager.action');
+        $execution = $actionManager->listAction($request, $name);
 
         $form = NULL;
-        if ($eInfo['displayElements'][Configuration::DISP_ELEM_FORM]['full']) {
-            $form = $this->createForm($eInfo['fullFormType'], $e);
-            $form->handleRequest($request);
-            if ($form->isSubmitted() && $form->isValid()) {
-                return $this->addFormReception($eInfo, $e, $dispatcher, $name);
-            }
-            $form = $form->createView();
+        if ($execution["entityInfo"]['displayElements'][Conf::DISP_ELEM_FORM]['full']) {
+            $process = $actionManager->processAddForm($request, $execution["entityInfo"]);
+            if ($process["success"])
+                return $this->redirectToRoute('db.manager.list', array('name' => $name));
+            $form = $process["form"]->createView();
         }
 
-        return $this->render($eInfo['mainView'], array(
+        return $this->render($execution["entityInfo"]['mainView'], array(
             'name' => $name,
-            'eInfo' => $eInfo,
-            'all' => $all,
+            'eInfo' => $execution["entityInfo"],
+            'all' => $execution["data"],
             'form' => $form,
-            'action' => array( 'name' => Configuration::PERM_ADD, 'formType' => Configuration::PERM_ADD)
+            'action' => array( 'name' => Conf::PERM_ADD, 'formType' => Conf::PERM_ADD)
         ));
     }
 
     public function addAction(Request $request, $name)
     {
-        /** @var $dispatcher Dispatcher */
-        $dispatcher = $this->get('event_dispatcher');
-        /** @var $checker Checker */
-        $checker = $this->get('fqt.dbcm.checker');
-        $eInfo = $checker->getEntity($name, Configuration::PERM_ADD);
-        $checker->checkObjectPermission($eInfo, NULL, Configuration::PERM_ADD);
+        /** @var $checker ActionManager */
+        $actionManager = $this->get('fqt.dbcm.manager.action');
+        $execution = $actionManager->addAction($request, $name);
+        if ($execution["success"])
+            return $this->redirectToRoute('db.manager.list', array('name' => $name));
 
-        $e = new $eInfo['fullPath']();
-        $form = $this->createForm($eInfo['fullFormType'], $e);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            return $this->addFormReception($eInfo, $e, $dispatcher, $name);
-        }
-
-        return $this->render($eInfo['mainView'], array(
+        return $this->render($execution["entityInfo"]['mainView'], array(
             'name' => $name,
-            'eInfo' => $eInfo,
-            'all' => NULL,
-            'form' => $form->createView(),
-            'action' => array( 'name' => Configuration::PERM_ADD, 'formType' => Configuration::PERM_ADD)
+            'eInfo' => $execution["entityInfo"],
+            'all' => $execution["data"],
+            'form' => $execution["form"]->createView(),
+            'action' => array( 'name' => Conf::PERM_ADD, 'formType' => Conf::PERM_ADD)
         ));
     }
 
     public function editAction(Request $request, $name, $id)
     {
-        /** @var $dispatcher Dispatcher */
-        $dispatcher = $this->get('event_dispatcher');
-        /** @var $checker Checker */
-        $checker = $this->get('fqt.dbcm.checker');
-        $eInfo = $checker->getEntity($name, Configuration::PERM_EDIT);
+        /** @var $checker ActionManager */
+        $actionManager = $this->get('fqt.dbcm.manager.action');
+        $execution = $actionManager->editAction($request, $name, $id);
 
-        $all = $checker->getEntityObject($eInfo);
-        $e = $checker->getEntityObject($eInfo, Configuration::PERM_EDIT, $id);
-        if (!$e) {
+        if ($execution == NULL) {
             $this->addFlash('danger','Entity not found');
             return $this->redirectToRoute('db.manager.list', array('name' => $name));
         }
-        $form = $this->createForm($eInfo['fullFormType'], $e);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $event = new ActionEvent($eInfo, $e, array('success', 'Your entity have been updated'));
-            $dispatcher->dispatch(DBCMEvents::ACTION_EDIT_BEFORE, $event);
 
-            if (!$event->isExecuted()) {
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($e);
-                $em->flush();
-            }
-            $this->addFlash($event->getFlashTitle(),$event->getFlashMessage());
-            return $this->redirectToRoute('db.manager.list', array('name' => $name));
-        }
-        return $this->render($eInfo['mainView'], array(
+        return $this->render($execution["entityInfo"]['mainView'], array(
             'name' => $name,
-            'eInfo' => $eInfo,
-            'all' => $all,
-            'form' => $form->createView(),
-            'action' => array( 'name' => Configuration::PERM_EDIT, 'formType' => Configuration::PERM_EDIT)
+            'eInfo' => $execution["entityInfo"],
+            'all' => $execution["data"],
+            'form' => $execution["form"]->createView(),
+            'action' => array( 'name' => Conf::PERM_ADD, 'formType' => Conf::PERM_ADD)
         ));
     }
 
     public function removeAction($name, $id)
     {
-        /** @var $dispatcher Dispatcher */
-        $dispatcher = $this->get('event_dispatcher');
-        /** @var $checker Checker */
-        $checker = $this->get('fqt.dbcm.checker');
-        $eInfo = $checker->getEntity($name, Configuration::PERM_REMOVE);
-
-        $e = $checker->getEntityObject($eInfo, Configuration::PERM_REMOVE, $id);
-        if ($e) {
-            $event = new ActionEvent($eInfo, $e, array('success', 'Your entity have been removed'));
-            $dispatcher->dispatch(DBCMEvents::ACTION_REMOVE_BEFORE, $event);
-
-            if (!$event->isExecuted()) {
-                $em = $this->getDoctrine()->getManager();
-                $em->remove($e);
-                $em->flush();
-            }
-            $this->addFlash($event->getFlashTitle(),$event->getFlashMessage());
-        } else
-            $this->addFlash('danger','Your entity could not be deleted');
-        return $this->redirectToRoute('db.manager.list', array('name' => $name));
-    }
-
-    /**
-     * Process on add form reception
-     *
-     * @param array $eInfo
-     * @param $e
-     * @param Dispatcher $dispatcher
-     * @param string $name
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     */
-    private function addFormReception(array $eInfo, $e, Dispatcher $dispatcher, string $name){
-        $event = new ActionEvent($eInfo, $e, array('success', 'Your entity have been added'));
-        $dispatcher->dispatch(DBCMEvents::ACTION_ADD_BEFORE, $event);
-
-        if (!$event->isExecuted()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($e);
-            $em->flush();
+        /** @var $checker ActionManager */
+        $actionManager = $this->get('fqt.dbcm.manager.action');
+        $execution = $actionManager->removeAction($name, $id);
+        if ($execution["success"]) {
+            $event = $execution["data"];
+            $this->addFlash($event->getFlashTitle(), $event->getFlashMessage());
         }
-        $this->addFlash($event->getFlashTitle(),$event->getFlashMessage());
+        else
+            $this->addFlash('danger','Your entity could not be deleted');
         return $this->redirectToRoute('db.manager.list', array('name' => $name));
     }
 }
