@@ -13,20 +13,21 @@
 
 namespace DB\ManagerBundle\Controller;
 
-use DB\ManagerBundle\DBManagerEvents;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use DB\ManagerBundle\DependencyInjection\Configuration;
-use DB\ManagerBundle\Event\ActionEvent;
-use DB\ManagerBundle\Checker\EntityManager as Checker;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as Dispatcher;
+
+use FQT\DBCoreManagerBundle\FQTDBCoreManagerEvents as DBCMEvents;
+use FQT\DBCoreManagerBundle\DependencyInjection\Configuration;
+use FQT\DBCoreManagerBundle\Event\ActionEvent;
+use FQT\DBCoreManagerBundle\Checker\EntityManager as Checker;
 
 class ManageController extends Controller
 {
     public function indexAction()
     {
         /** @var $checker Checker */
-        $checker = $this->get('db.manager.checker');
+        $checker = $this->get('fqt.dbcm.checker');
         $entities = $checker->getEntities();
 
         return $this->render($checker->getSettings()['indexView'], array(
@@ -39,7 +40,7 @@ class ManageController extends Controller
         /** @var $dispatcher Dispatcher */
         $dispatcher = $this->get('event_dispatcher');
         /** @var $checker Checker */
-        $checker = $this->get('db.manager.checker');
+        $checker = $this->get('fqt.dbcm.checker');
         $eInfo = $checker->getEntity($name, Configuration::PERM_LIST);
 
         $e = new $eInfo['fullPath']();
@@ -69,7 +70,7 @@ class ManageController extends Controller
         /** @var $dispatcher Dispatcher */
         $dispatcher = $this->get('event_dispatcher');
         /** @var $checker Checker */
-        $checker = $this->get('db.manager.checker');
+        $checker = $this->get('fqt.dbcm.checker');
         $eInfo = $checker->getEntity($name, Configuration::PERM_ADD);
         $checker->checkObjectPermission($eInfo, NULL, Configuration::PERM_ADD);
 
@@ -94,7 +95,7 @@ class ManageController extends Controller
         /** @var $dispatcher Dispatcher */
         $dispatcher = $this->get('event_dispatcher');
         /** @var $checker Checker */
-        $checker = $this->get('db.manager.checker');
+        $checker = $this->get('fqt.dbcm.checker');
         $eInfo = $checker->getEntity($name, Configuration::PERM_EDIT);
 
         $all = $checker->getEntityObject($eInfo);
@@ -107,7 +108,7 @@ class ManageController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $event = new ActionEvent($eInfo, $e, array('success', 'Your entity have been updated'));
-            $dispatcher->dispatch(DBManagerEvents::ACTION_EDIT_BEFORE, $event);
+            $dispatcher->dispatch(DBCMEvents::ACTION_EDIT_BEFORE, $event);
 
             if (!$event->isExecuted()) {
                 $em = $this->getDoctrine()->getManager();
@@ -131,13 +132,13 @@ class ManageController extends Controller
         /** @var $dispatcher Dispatcher */
         $dispatcher = $this->get('event_dispatcher');
         /** @var $checker Checker */
-        $checker = $this->get('db.manager.checker');
+        $checker = $this->get('fqt.dbcm.checker');
         $eInfo = $checker->getEntity($name, Configuration::PERM_REMOVE);
 
         $e = $checker->getEntityObject($eInfo, Configuration::PERM_REMOVE, $id);
         if ($e) {
             $event = new ActionEvent($eInfo, $e, array('success', 'Your entity have been removed'));
-            $dispatcher->dispatch(DBManagerEvents::ACTION_REMOVE_BEFORE, $event);
+            $dispatcher->dispatch(DBCMEvents::ACTION_REMOVE_BEFORE, $event);
 
             if (!$event->isExecuted()) {
                 $em = $this->getDoctrine()->getManager();
@@ -161,7 +162,7 @@ class ManageController extends Controller
      */
     private function addFormReception(array $eInfo, $e, Dispatcher $dispatcher, string $name){
         $event = new ActionEvent($eInfo, $e, array('success', 'Your entity have been added'));
-        $dispatcher->dispatch(DBManagerEvents::ACTION_ADD_BEFORE, $event);
+        $dispatcher->dispatch(DBCMEvents::ACTION_ADD_BEFORE, $event);
 
         if (!$event->isExecuted()) {
             $em = $this->getDoctrine()->getManager();

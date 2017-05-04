@@ -15,6 +15,10 @@ namespace DB\ManagerBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+/**
+ * {@inheritDoc}
+ * @todo Possibilité de créer des actions. Supprimer les actions pas defauts (Ajouter/Editer/Supprimer)
+ */
 class DBManagerBundle extends Bundle
 {
 
