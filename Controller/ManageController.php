@@ -36,7 +36,7 @@ class ManageController extends Controller
         ));
     }
 
-    public function processAction(Request$request, $method, $name, $id) {
+    public function processAction(Request $request, $method, $name, $id) {
         /** @var $checker ActionManager */
         $actionManager = $this->get('fqt.dbcm.manager.action');
         $execution = $actionManager->customAction($request, $method, $name, $id);
@@ -45,12 +45,28 @@ class ManageController extends Controller
             foreach ($execution["data"]["flash"] as $flash)
                 $this->addFlash($flash["type"], $flash["message"]);
         }
+        $execution["entityInfo"]["displayElements"] = $this->getDisplayPermissions($execution["entityInfo"], "null");
 
-        return $this->redirectToRoute('db.manager.list', array('name' => $name));
+        $form = $this->getKeySecure("form", $execution["data"]);
+        if ($method != Conf::DEF_LIST && $form == null && $execution["data"]["success"])
+            return $this->redirectToRoute('db.manager.list', array('name' => $name));
+
+        var_dump($execution["data"]);
+
+        return $this->render($execution["entityInfo"]['mainView'], array(
+            'name' => $name,
+            'eInfo' => $execution["entityInfo"],
+            'all' => $this->getKeySecure("all", $execution["data"]),
+            'form' => $form,
+            'action' => array( 'name' => Conf::PERM_ADD, 'formType' => Conf::PERM_ADD)
+        ));
     }
 
     public function listAction(Request $request, $name)
     {
+
+        return $this->processAction($request, Conf::DEF_LIST, $name, null);
+
         /** @var $checker ActionManager */
         $actionManager = $this->get('fqt.dbcm.manager.action');
         $execution = $actionManager->listAction($name);
@@ -147,5 +163,17 @@ class ManageController extends Controller
                 Conf::DISP_ELEM_REMOVELINK => true, #$full and $entity['permissions'][Conf::PERM_REMOVE] and $this->entityAccess($entity, Conf::PERM_REMOVE)
             )
         );
+    }
+
+    /**
+     * Return value of key or null if doesn't exist
+     * @param $key
+     * @param $array
+     * @return null
+     */
+    private function getKeySecure($key, $array) {
+        if (key_exists($key, $array))
+            return $array[$key];
+        return null;
     }
 }

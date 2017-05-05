@@ -22,10 +22,10 @@
         {% include eInfo.listView %}
     {% endif %}
 
-    {% if eInfo.displayElements.form.full %}
+    {% if form is not null and eInfo.displayElements.form.full %}
         {% include eInfo.formView %}
     {% elseif eInfo.displayElements.form.addLink %}
-        <a href="{{ path('db.manager.add', {'name':name}) }}">{{ 'entity.action.add'|trans }}</a>
+        <a href="{{ path('db.manager.process', {'method':constant('FQT\\DBCoreManagerBundle\\DependencyInjection\\Configuration::DEF_ADD'), 'name':name}) }}">{{ 'entity.action.add'|trans }}</a>
     {% endif %}
 
 {% endblock %}
