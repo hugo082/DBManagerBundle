@@ -14,12 +14,11 @@
                     <td>{{ item }}</td>
                 {% endfor %}
 
-                {% if eInfo.displayElements.list.editLink and e.permissions.edit %}
-                    <td><a href="{{ path('db.manager.edit', {'name':name,'id':e.obj.id})}}">{{ 'entity.action.edit'|trans }}</a></td>
-                {% endif %}
-                {% if eInfo.displayElements.list.removeLink and e.permissions.remove %}
-                    <td><a href="{{ path('db.manager.remove', {'name':name,'id':e.obj.id})}}">{{ 'entity.action.remove'|trans }}</a></td>
-                {% endif %}
+                {% for methodId, method in eInfo.methods %}
+                    {% if method.environment == constant('FQT\\DBCoreManagerBundle\\DependencyInjection\\Configuration::ENV_OBJECT') %}
+                        <td><a href="{{ path('db.manager.process', {'method':methodId,'name':name,'id':e.obj.id})}}">{{ method.fullName }}</a></td>
+                    {% endif %}
+                {% endfor %}
             </tr>
         {% endfor %}
     </table>

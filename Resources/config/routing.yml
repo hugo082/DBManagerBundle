@@ -6,14 +6,8 @@ db.manager.list:
     path:     /{name}
     defaults: { _controller: DBManagerBundle:Manage:list }
 
-db.manager.add:
-    path:     /add/{name}
-    defaults: { _controller: DBManagerBundle:Manage:add }
-
-db.manager.edit:
-    path:     /edit/{name}/{id}
-    defaults: { _controller: DBManagerBundle:Manage:edit }
-
-db.manager.remove:
-    path:     /remove/{name}/{id}
-    defaults: { _controller: DBManagerBundle:Manage:remove }
+db.manager.process:
+    path:     /process/{method}/{name}/{id}
+    defaults: { _controller: DBManagerBundle:Manage:process, id: -1}
+    requirements:
+            page: '\d+'
