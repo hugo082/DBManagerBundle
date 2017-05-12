@@ -38,6 +38,7 @@ class DBManagerExtension extends Extension
 
         $this->loadTemplates($config, $container);
         $this->loadViews($config, $container);
+        $this->loadLinks($config, $container);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
@@ -45,6 +46,20 @@ class DBManagerExtension extends Extension
 
     private function loadTemplates(array $config, ContainerBuilder $container) {
         $container->setParameter($this->getAlias().'.templates', $config['templates']);
+    }
+
+    /**
+     * @param array            $config
+     * @param ContainerBuilder $container
+     */
+    private function loadLinks(array $config, ContainerBuilder $container)
+    {
+        $views = array();
+        foreach ($config['links'] as $view) {
+            $this->checkArrayContentOfKey($view, "container");
+            $views[$view['action']] = $view;
+        }
+        $container->setParameter($this->getAlias().'.links', $views);
     }
 
     /**

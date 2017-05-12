@@ -81,6 +81,16 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->arrayNode('links')
+                    ->prototype('array')->addDefaultsIfNotSet()
+                        ->children()
+                            ->scalarNode('action')->isRequired()->cannotBeEmpty()->end()
+                            ->arrayNode('container')->isRequired()->cannotBeEmpty()
+                                ->prototype('scalar')->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
             ->end()
         ;
     }

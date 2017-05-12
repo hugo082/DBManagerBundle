@@ -20,6 +20,10 @@
 
 
 
+    {% for link in links %}
+        <a href="{{ path('db.manager.process', link.parameter) }}">{{ link.name }}</a>
+    {% endfor %}
+
     {% for view in views %}
         {% include view.viewMeta.view with { 'data' : view.data.data, 'action': view.action} %}
     {% endfor %}

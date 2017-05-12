@@ -14,9 +14,9 @@
                     <td>{{ item }}</td>
                 {% endfor %}
 
-                {% for method in eInfo.actions %}
-                    {% if e.permissions[method.id] and method.environment == constant('FQT\\DBCoreManagerBundle\\DependencyInjection\\Configuration::ENV_OBJECT') %}
-                        <td><a href="{{ path('db.manager.process', {'method':method.id,'name':name,'id':e.obj.id})}}">{{ method.fullName }}</a></td>
+                {% for action in eInfo.actions %}
+                    {% if e.permissions[action.id] and action.environment == constant('FQT\\DBCoreManagerBundle\\DependencyInjection\\Configuration::ENV_OBJECT') %}
+                        <td><a href="{{ path('db.manager.process', {'actionID':action.id,'name':name,'id':e.obj.id})}}">{{ action.fullName }}</a></td>
                     {% endif %}
                 {% endfor %}
             </tr>

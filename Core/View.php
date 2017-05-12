@@ -34,7 +34,7 @@ class View
      */
     private $data;
 
-    public function __construct(Action $action, ViewMetaData $viewMeta = null, Data $data) {
+    public function __construct(Action $action, Data $data, ViewMetaData $viewMeta = null) {
         $this->action = $action;
         $this->viewMeta = $viewMeta;
         $this->data = $data;

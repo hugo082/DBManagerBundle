@@ -7,7 +7,7 @@ db.manager.list:
     defaults: { _controller: DBManagerBundle:Manage:list }
 
 db.manager.process:
-    path:     /process/{method}/{name}/{id}
+    path:     /process/{actionID}/{name}/{id}
     defaults: { _controller: DBManagerBundle:Manage:process, id: -1}
     requirements:
             page: '\d+'

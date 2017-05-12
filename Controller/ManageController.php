@@ -37,11 +37,11 @@ class ManageController extends Controller
         ));
     }
 
-    public function processAction(Request $request, $method, $name, $id) {
+    public function processAction(Request $request, $actionID, $name, $id) {
 
         /** @var $viewManager ViewManager */
         $viewManager = $this->get('fqt.db.manager.view.manager');
-        $execution = $viewManager->processAction($request, $method, $name, $id);
+        $execution = $viewManager->processAction($request, $actionID, $name, $id);
 
         foreach ($execution->getFlash() as $flash)
                 $this->addFlash($flash["type"], $flash["message"]);
@@ -57,6 +57,7 @@ class ManageController extends Controller
         return $this->render($viewManager->getTemplate(false), array(
             'name' => $name,
             'views' => $execution->views,
+            'links' => $execution->links,
             'eInfo' => $execution->entityInfo
         ));
     }

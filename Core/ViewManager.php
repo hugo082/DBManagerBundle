@@ -41,6 +41,11 @@ class ViewManager
     /**
      * @var array
      */
+    private $links;
+
+    /**
+     * @var array
+     */
     private $templates;
 
     /**
@@ -48,8 +53,9 @@ class ViewManager
      */
     private $actionManager;
 
-    public function __construct(Container $container, array $views, array $templates) {
+    public function __construct(Container $container, array $views, array $links, array $templates) {
         $this->views = self::arrayToViewsMetaData($views);
+        $this->links = self::arrayToLinksMetaData($links);
         $this->templates = $templates;
         $this->container = $container;
     }
@@ -68,6 +74,7 @@ class ViewManager
             return $this->actionManager->indexAction();
         $execution = new Execution($this->actionManager->customAction($request, $actionID, $name, $id));
         $this->loadViews($execution, $request, $id);
+        $this->loadLinks($execution);
         return $execution;
     }
 
@@ -77,16 +84,30 @@ class ViewManager
      * @param Request $request
      * @param $id
      */
-    public function loadViews(Execution $execution, Request $request, $id) {
+    private function loadViews(Execution $execution, Request $request, $id) {
         $this->computeMainActionView($execution);
         if ($execution->isDisplayable()) {
-            foreach ($execution->getContainer() as $childActionID) {
+            foreach ($execution->getViewContainer() as $childActionID) {
                 $childAction = $execution->entityInfo->getActionWithID($childActionID, true);
                 if (!$childAction->isFullAuthorize())
                     continue;
                 $data = $this->actionManager->processAction($request, $childAction, $id);
                 $viewMeta = $this->getViewMetaDataForAction($childAction, true);
-                $execution->pushView(new View($childAction, $viewMeta, $data));
+                $execution->pushView(new View($childAction, $data, $viewMeta, null));
+            }
+        }
+    }
+
+    private function loadLinks(Execution $execution) {
+        if ($execution->isDisplayable()) {
+            $linkMeta = $this->getLinkMetaDataForAction($execution->mainView->getAction());
+            if ($linkMeta == null)
+                return;
+            foreach ($linkMeta->getContainer() as $childActionID) {
+                $childAction = $execution->entityInfo->getActionWithID($childActionID, true);
+                if (!$childAction->isFullAuthorize())
+                    continue;
+                $execution->pushLink(new Link($childAction, $execution->entityInfo));
             }
         }
     }
@@ -97,10 +118,21 @@ class ViewManager
      * @return ViewMetaData|null
      */
     public function computeMainActionView(Execution $execution) {
-        $viewMeta = $this->getViewMetaDataForAction($execution->mainView->getAction(), true);
-        if ($viewMeta->getView() != null)
+        $viewMeta = $this->getViewMetaDataForAction($execution->mainView->getAction());
+        if ($viewMeta != null && $viewMeta->getView() != null)
             $execution->pushMainView($viewMeta);
         return $viewMeta;
+    }
+
+    /**
+     * Get the view information for action $action
+     * @param Action $action
+     * @return LinkMetaData|null
+     */
+    public function getLinkMetaDataForAction(Action $action) {
+        if (!key_exists($action->id, $this->links))
+            return null;
+        return $this->links[$action->id];
     }
 
     /**
@@ -140,8 +172,14 @@ class ViewManager
         return $viewsMeta;
     }
 
+    public static function arrayToLinksMetaData(array $data) {
+        $linksMeta = array();
+        foreach ($data as $dataLinkMeta) {
+            $linksMeta[$dataLinkMeta["action"]] = new LinkMetaData($dataLinkMeta);
+        }
+        return $linksMeta;
+    }
+
     // TODO : indexView Action (default list)
     // TODO : getGlobalAction - getObjectAction
-    // TODO : Link Global Action - Execute Global Action (db_manager.links - db_manager.views)
-    // TODO : Tester les action par defaut
 }

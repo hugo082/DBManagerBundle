@@ -33,6 +33,12 @@ class Execution
     public $views;
 
     /**
+     * Array of Link
+     * @var array
+     */
+    public $links;
+
+    /**
      * @var View
      */
     public $mainView;
@@ -52,6 +58,7 @@ class Execution
         $this->entityInfo = $execution->entityInfo;
         $this->mainView = self::coreExecutionToView($execution);
         $this->views = array();
+        $this->links = array();
     }
 
     public function pushMainView(ViewMetaData $viewMeta) {
@@ -65,12 +72,18 @@ class Execution
         $this->views[] = $view;
     }
 
+    public function pushLink(Link $link) {
+        if (!$link->isDisplayable())
+            throw new \Exception("Impossible to push view '" . $link->getID() . "'. It's not viewable.");
+        $this->links[] = $link;
+    }
+
     public function isDisplayable() {
         return !empty($this->views);
     }
 
     public static function coreExecutionToView(CoreExecution $execution) {
-        return new View($execution->action, null, $execution->data);
+        return new View($execution->action, $execution->data, null, null);
     }
 
     public function computeData() {
@@ -78,12 +91,18 @@ class Execution
         $this->redirection = null;
         /** @var View $view */
         foreach ($this->views as $view) {
-            if ($view->getData() != null) {
-                array_merge($this->flash, $view->getData()->getFlash());
-                $red = $view->getData()->getRedirection($this->entityInfo->name);
-                if ($red != null)
-                    $this->redirection = $red;
-            }
+            if ($view->getID() != $this->mainView->getID())
+                $this->computeDataOfView($view);
+        }
+        $this->computeDataOfView($this->mainView);
+    }
+
+    public function computeDataOfView(View $view) {
+        if ($view->getData() != null) {
+            $this->flash = array_merge($this->flash, $view->getData()->getFlash());
+            $red = $view->getData()->getRedirection($this->entityInfo->name);
+            if ($red != null)
+                $this->redirection = $red;
         }
     }
 
@@ -99,7 +118,11 @@ class Execution
         return $this->redirection;
     }
 
-    public function getContainer() {
+    public function getViewContainer() {
         return $this->mainView->getViewMeta()->getContainer();
+    }
+
+    public function getLinkContainer() {
+        return $this->mainView->getLinkMeta()->getContainer();
     }
 }
