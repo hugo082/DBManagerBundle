@@ -1,22 +1,22 @@
 {% trans_default_domain 'DBManagerBundle' %}
 
 <h3>{{ 'entity.listing'|trans }} :</h3>
-{% if all is not empty %}
+{% if data.all is not empty %}
     <table>
         <tr>
-            {% for name in all.0.obj.properties %}
+            {% for name in data.all.0.obj.properties %}
                 <th>{{ name }}</th>
             {% endfor %}
         </tr>
-        {% for e in all %}
+        {% for e in data.all %}
             <tr>
                 {% for item in e.obj.vars %}
                     <td>{{ item }}</td>
                 {% endfor %}
 
-                {% for methodId, method in eInfo.methods %}
-                    {% if method.environment == constant('FQT\\DBCoreManagerBundle\\DependencyInjection\\Configuration::ENV_OBJECT') %}
-                        <td><a href="{{ path('db.manager.process', {'method':methodId,'name':name,'id':e.obj.id})}}">{{ method.fullName }}</a></td>
+                {% for method in eInfo.actions %}
+                    {% if e.permissions[method.id] and method.environment == constant('FQT\\DBCoreManagerBundle\\DependencyInjection\\Configuration::ENV_OBJECT') %}
+                        <td><a href="{{ path('db.manager.process', {'method':method.id,'name':name,'id':e.obj.id})}}">{{ method.fullName }}</a></td>
                     {% endif %}
                 {% endfor %}
             </tr>

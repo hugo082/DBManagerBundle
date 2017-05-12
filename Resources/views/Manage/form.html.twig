@@ -1,9 +1,14 @@
 {% trans_default_domain 'DBManagerBundle' %}
 
-<h3>{{ ('entity.action.'~action.formType)|trans }} :</h3>
-{{ form_start(form) }}
-        {% for row in form %}
+
+
+<h2>form view</h2>
+
+
+<h3>{{ (eInfo.name~'.'~action.id)|trans }} :</h3>
+{{ form_start(data.form) }}
+        {% for row in data.form %}
             {{ form_row(row) }}
         {% endfor %}
 <button type="submit" name="button">{{ 'entity.form.submit'|trans }}</button>
-{{ form_end(form) }}
+{{ form_end(data.form) }}

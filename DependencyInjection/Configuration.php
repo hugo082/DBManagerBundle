@@ -17,6 +17,9 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
+use FQT\DBCoreManagerBundle\Core\Action;
+use DB\ManagerBundle\Core\ViewMetaData;
+
 /**
  * This is the class that validates and merges configuration from your app/config files.
  *
@@ -24,11 +27,21 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 class Configuration implements ConfigurationInterface
 {
-    public const DISP_ELEM_FORM = 'form';
-    public const DISP_ELEM_LIST = 'list';
-    public const DISP_ELEM_ADDLINK = 'addLink';
-    public const DISP_ELEM_REMOVELINK = 'removeLink';
-    public const DISP_ELEM_EDITLINK = 'editLink';
+    public const FORM_VIEW = 'form';
+    public const LIST_VIEW = 'list';
+
+    public const DEF_VIEWS = array(
+        self::FORM_VIEW => 'DBManagerBundle:Manage:form.html.twig',
+        self::LIST_VIEW => 'DBManagerBundle:Manage:list.html.twig'
+    );
+
+    public static function getDefaultViewInfoForAction(Action $action) {
+        if (in_array($action->id, array("add", "edit")))
+            return ViewMetaData::createWithDefaultView($action->id, self::FORM_VIEW);
+        elseif (in_array($action->id, array("list")))
+            return ViewMetaData::createWithDefaultView($action->id, self::LIST_VIEW);
+        return null;
+    }
 
     /**
      * {@inheritdoc}
@@ -50,21 +63,20 @@ class Configuration implements ConfigurationInterface
     {
         $node
             ->children()
-                ->arrayNode('views')
-                    ->addDefaultsIfNotSet()
-                    ->canBeUnset()
+                ->arrayNode('templates')->addDefaultsIfNotSet()
                     ->children()
-                        ->scalarNode('indexView')->defaultValue('DBManagerBundle:Manage:index.html.twig')->end() // Auto
-                        ->arrayNode('list')
-                        ->addDefaultsIfNotSet()
-                            ->children()
-                                ->booleanNode(Configuration::DISP_ELEM_FORM)->defaultTrue()->end()
-                            ->end()
-                        ->end()
-                        ->arrayNode('edit')
-                        ->addDefaultsIfNotSet()
-                            ->children()
-                                ->booleanNode(Configuration::DISP_ELEM_LIST)->defaultTrue()->end()
+                        ->scalarNode('index')->defaultValue('DBManagerBundle:Manage:index.html.twig')->end()
+                        ->scalarNode('main')->defaultValue('DBManagerBundle:Manage:entity.html.twig')->end()
+                    ->end()
+                ->end()
+                ->arrayNode('views')
+                    ->prototype('array')->addDefaultsIfNotSet()
+                        ->children()
+                            ->scalarNode('action')->isRequired()->cannotBeEmpty()->end()
+                            ->scalarNode('default_view')->end()
+                            ->scalarNode('custom_view')->end()
+                            ->arrayNode('container')
+                                ->prototype('scalar')->end()
                             ->end()
                         ->end()
                     ->end()

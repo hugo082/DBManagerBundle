@@ -36,11 +36,15 @@ class DBManagerExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-
+        $this->loadTemplates($config, $container);
         $this->loadViews($config, $container);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
+    }
+
+    private function loadTemplates(array $config, ContainerBuilder $container) {
+        $container->setParameter($this->getAlias().'.templates', $config['templates']);
     }
 
     /**
@@ -49,13 +53,21 @@ class DBManagerExtension extends Extension
      */
     private function loadViews(array $config, ContainerBuilder $container)
     {
-        $config['views'][CoreConf::PERM_EDIT][Conf::DISP_ELEM_FORM] = true;
-        $config['views'][CoreConf::PERM_ADD][Conf::DISP_ELEM_FORM] = true;
-        $config['views'][CoreConf::PERM_ADD][Conf::DISP_ELEM_LIST] = false;
-        $config['views'][CoreConf::PERM_LIST][Conf::DISP_ELEM_LIST] = true;
-        $config['views'][CoreConf::PERM_REMOVE][Conf::DISP_ELEM_FORM] = false;
-        $config['views'][CoreConf::PERM_REMOVE][Conf::DISP_ELEM_LIST] = false;
+        $views = array();
+        foreach ($config['views'] as $view) {
+            $this->checkArrayContentOfKey($view, "default_view");
+            $this->checkArrayContentOfKey($view, "custom_view");
+            $this->checkArrayContentOfKey($view, "container");
+            $views[$view['action']] = $view;
+        }
 
-        $container->setParameter($this->getAlias().'.views', $config['views']);
+        $container->setParameter($this->getAlias().'.views', $views);
+    }
+
+    private function checkArrayContentOfKey(array &$array, $key) {
+        if (key_exists($key, $array) && !empty($array[$key]))
+            return true;
+        $array[$key] = null;
+        return false;
     }
 }

@@ -1,2 +1,5 @@
 services:
-    #...
+
+    fqt.db.manager.view.manager:
+        class: DB\ManagerBundle\Core\ViewManager
+        arguments: [ "@service_container","%db_manager.views%","%db_manager.templates%" ]

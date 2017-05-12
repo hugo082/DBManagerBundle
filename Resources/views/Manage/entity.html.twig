@@ -18,14 +18,18 @@
     <h1>{{ 'entity.title'|trans({'%name%': name}) }}</h1>
     <a href="{{ path('db.manager') }}">Main</a>
 
-    {% if eInfo.displayElements.list.full %}
-        {% include eInfo.listView %}
-    {% endif %}
 
-    {% if form is not null and eInfo.displayElements.form.full %}
-        {% include eInfo.formView %}
-    {% elseif eInfo.displayElements.form.addLink %}
-        <a href="{{ path('db.manager.process', {'method':constant('FQT\\DBCoreManagerBundle\\DependencyInjection\\Configuration::DEF_ADD'), 'name':name}) }}">{{ 'entity.action.add'|trans }}</a>
-    {% endif %}
+
+    {% for view in views %}
+        {% include view.viewMeta.view with { 'data' : view.data.data, 'action': view.action} %}
+    {% endfor %}
+
+    {#
+    {% for methodId, method in eInfo.methods %}
+        {% if method.environment == constant('FQT\\DBCoreManagerBundle\\DependencyInjection\\Configuration::ENV_GLOBAL') %}
+            <td><a href="{{ path('db.manager.process', { 'method':methodId,'name':name })}}">{{ method.fullName }}</a></td>
+        {% endif %}
+    {% endfor %}
+    #}
 
 {% endblock %}
