@@ -38,7 +38,6 @@ class ManageController extends Controller
     }
 
     public function processAction(Request $request, $actionID, $name, $id) {
-
         /** @var $viewManager ViewManager */
         $viewManager = $this->get('fqt.db.manager.view.manager');
         $execution = $viewManager->processAction($request, $actionID, $name, $id);
@@ -48,11 +47,6 @@ class ManageController extends Controller
 
         if ($execution->getRedirection() != null)
             return $this->redirectToRoute($execution->getRedirection()["route_name"], $execution->getRedirection()["data"]);
-
-
-        /** @var View $v */
-        foreach ($execution->views as $v)
-            echo $v->getAction()->id . " - " . $v->getViewMeta()->getView() . " <br> ";
 
         return $this->render($viewManager->getTemplate(false), array(
             'name' => $name,

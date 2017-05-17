@@ -12,10 +12,11 @@
     "Database manager", "Web interface manager"
   ],
   "require" : {
-    "php" : ">=5.6.0",
+    "php" : ">=7.0.0",
     "symfony/framework-bundle" : ">=3.0",
     "twig/twig" : "*",
-    "doctrine/doctrine-bundle" : "*"
+    "doctrine/doctrine-bundle" : "*",
+    "fqt/db-core-managerbundle" : "1.*"
   },
   "autoload" : {
     "psr-0" : {
