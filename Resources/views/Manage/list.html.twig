@@ -3,20 +3,22 @@
 <h3>{{ 'entity.listing'|trans }} :</h3>
 {% if data.all is not empty %}
     <table>
+
         <tr>
-            {% for name in data.all.0.obj.properties %}
-                <th>{{ name }}</th>
+            {% for name in data.all.0.annotation_container.annotations %}
+                <th>{{ name.title }}</th>
             {% endfor %}
         </tr>
+
         {% for e in data.all %}
             <tr>
-                {% for item in e.obj.vars %}
-                    <td>{{ item }}</td>
+                {% for item in e.annotation_container.annotations %}
+                    <td>{{ item.value }}</td>
                 {% endfor %}
 
                 {% for action in eInfo.actions %}
                     {% if e.permissions[action.id] and action.environment == constant('FQT\\DBCoreManagerBundle\\DependencyInjection\\Configuration::ENV_OBJECT') %}
-                        <td><a href="{{ path('db.manager.process', {'actionID':action.id,'name':name,'id':e.obj.id})}}">{{ action.fullName }}</a></td>
+                        <td><a href="{{ path('db.manager.process', {'actionID':action.id,'name':name,'id':e.annotation_container.objectId})}}">{{ action.fullName }}</a></td>
                     {% endif %}
                 {% endfor %}
             </tr>

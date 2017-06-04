@@ -88,8 +88,8 @@ class ViewManager
         $this->computeMainActionView($execution);
         if ($execution->isDisplayable()) {
             foreach ($execution->getViewContainer() as $childActionID) {
-                $childAction = $execution->entityInfo->getActionWithID($childActionID, true);
-                if (!$childAction->isFullAuthorize())
+                $childAction = $execution->entityInfo->getActionWithID($childActionID, false);
+                if (!$childAction || !$childAction->isFullAuthorize())
                     continue;
                 $data = $this->actionManager->processAction($request, $childAction, $id);
                 $viewMeta = $this->getViewMetaDataForAction($childAction, true);
@@ -104,8 +104,8 @@ class ViewManager
             if ($linkMeta == null)
                 return;
             foreach ($linkMeta->getContainer() as $childActionID) {
-                $childAction = $execution->entityInfo->getActionWithID($childActionID, true);
-                if (!$childAction->isFullAuthorize())
+                $childAction = $execution->entityInfo->getActionWithID($childActionID, false);
+                if (!$childAction || !$childAction->isFullAuthorize())
                     continue;
                 $execution->pushLink(new Link($childAction, $execution->entityInfo));
             }
