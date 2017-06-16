@@ -50,7 +50,7 @@ class Link
 
     public function getParameter() {
         return array(
-            "name" => $this->entityInfo->name,
+            "name" => $this->entityInfo->id,
             "actionID" => $this->action->id,
             "id" => null
         );

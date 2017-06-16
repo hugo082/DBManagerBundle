@@ -19,7 +19,6 @@
     <a href="{{ path('db.manager') }}">Main</a>
 
 
-
     {% for link in links %}
         <a href="{{ path('db.manager.process', link.parameter) }}">{{ link.name }}</a>
     {% endfor %}

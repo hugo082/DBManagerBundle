@@ -25,7 +25,7 @@
         </tr>
         {% for key, entity in entities %}
             <tr>
-                <td><a href="{{ path('db.manager.list', {'name':key})}}">{{ key }}</a></td>
+                <td><a href="{{ path('db.manager.list', {'name':key})}}">{{ entity.title }}</a></td>
                 {% for actionID, action in entity.actions %}
                         <td>{{ action.fullAuthorize ? action.fullName : '-' }}</td>
                 {% endfor %}

@@ -77,7 +77,7 @@ DBM use 2 templates (`index` and `main`). Index view is the view that list all y
 You can override this template with `templates` argument in your configuration file.
 
     templates:
-        index_view: MyBundle:PathTo:MyView.html.twig
+        index: MyBundle:PathTo:MyView.html.twig
 
 ### Views configuration
 
