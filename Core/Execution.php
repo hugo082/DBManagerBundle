@@ -100,7 +100,7 @@ class Execution
     public function computeDataOfView(View $view) {
         if ($view->getData() != null) {
             $this->flash = array_merge($this->flash, $view->getData()->getFlash());
-            $red = $view->getData()->getRedirection($this->entityInfo->name);
+            $red = $view->getData()->getRedirection($this->entityInfo->getId());
             if ($red != null)
                 $this->redirection = $red;
         }
